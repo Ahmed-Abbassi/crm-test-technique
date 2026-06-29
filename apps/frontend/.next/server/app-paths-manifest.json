@@ -1,9 +1,10 @@
 {
-  "/opportunities/page": "app/opportunities/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/leads/page": "app/leads/page.js",
-  "/clients/page": "app/clients/page.js",
   "/opportunities/[id]/page": "app/opportunities/[id]/page.js",
-  "/pipeline/page": "app/pipeline/page.js",
   "/clients/[id]/page": "app/clients/[id]/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/pipeline/page": "app/pipeline/page.js",
+  "/opportunities/page": "app/opportunities/page.js",
+  "/clients/page": "app/clients/page.js",
+  "/clients/new/page": "app/clients/new/page.js"
 }
