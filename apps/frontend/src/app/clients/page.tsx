@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import type { Client, PaginationMeta } from '@/lib/types';
+import NewClientDrawer from './Newclientdrawer';
 
 function SkeletonRows() {
   return (
@@ -31,6 +31,7 @@ export default function ClientsPage() {
   const [typeFilter, setTypeFilter] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -47,6 +48,13 @@ export default function ClientsPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // After creating a client from the drawer, refresh the list so the new
+  // row (and updated total count) show up immediately.
+  const handleClientCreated = (_client: Client) => {
+    setPage(1);
+    fetchData();
+  };
+
   return (
     <div className="px-8 py-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -54,13 +62,15 @@ export default function ClientsPage() {
           <h1 className="text-xl font-semibold text-gray-900">Clients</h1>
           {meta && <p className="text-sm text-gray-400 mt-1">{meta.total} total</p>}
         </div>
-        <Link href="/clients/new"
-          className="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+        >
           <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           New client
-        </Link>
+        </button>
       </div>
 
       {error && (
@@ -131,6 +141,12 @@ export default function ClientsPage() {
           </div>
         </div>
       )}
+
+      <NewClientDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onCreated={handleClientCreated}
+      />
     </div>
   );
 }

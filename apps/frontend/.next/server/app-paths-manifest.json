@@ -1,7 +1,10 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
+  "/clients/page": "app/clients/page.js",
+  "/page": "app/page.js",
   "/opportunities/page": "app/opportunities/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/opportunities/new/page": "app/opportunities/new/page.js",
-  "/pipeline/page": "app/pipeline/page.js",
   "/opportunities/[id]/page": "app/opportunities/[id]/page.js",
-  "/clients/page": "app/clients/page.js"
+  "/pipeline/page": "app/pipeline/page.js"
 }
