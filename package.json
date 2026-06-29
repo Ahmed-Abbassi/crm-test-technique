@@ -1,0 +1,11 @@
+{
+  "name": "crm-module-demo-ahmed",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "build": "pnpm -r run build"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
