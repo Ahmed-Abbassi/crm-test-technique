@@ -26,6 +26,11 @@
       "static/chunks/main-app.js",
       "static/chunks/app/clients/page.js"
     ],
+    "/pipeline/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/pipeline/page.js"
+    ],
     "/opportunities/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -36,15 +41,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/clients/[id]/page.js"
     ],
-    "/pipeline/page": [
+    "/opportunities/[id]/edit/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/pipeline/page.js"
+      "static/chunks/app/opportunities/[id]/edit/page.js"
     ],
-    "/clients/new/page": [
+    "/opportunities/new/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/clients/new/page.js"
+      "static/chunks/app/opportunities/new/page.js"
     ]
   }
 }

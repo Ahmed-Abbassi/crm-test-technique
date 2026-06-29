@@ -83,12 +83,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold mt-0.5" style={{ color: 'var(--text-primary)' }}>Good morning, Sales Lead</h1>
         </div>
         <div className="flex items-center gap-3">
-          <PrimaryButton href="/opportunities/new">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            New Opportunity
-          </PrimaryButton>
+          
         </div>
       </div>
 

@@ -45,8 +45,12 @@ export default function ClientsPage() {
   const newClientButton = (
     <button
       onClick={() => setDrawerOpen(true)}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
-      style={{ background: 'var(--brand-blue)', color: '#fff' }}
+      className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-sm font-semibold transition-all duration-150"
+            style={{
+              background: 'linear-gradient(135deg, #4F46E5 0%, #6366F1 100%)',
+              color: '#fff',
+              boxShadow: '0 2px 8px rgba(79,70,229,0.35)',
+            }}
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

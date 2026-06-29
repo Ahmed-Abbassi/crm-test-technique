@@ -92,24 +92,7 @@ export default function SidebarNav() {
         </div>
 
         {/* Quick create button */}
-        <div className="px-4 pt-4 pb-2">
-          <button
-            onClick={() => setOpportunityDrawerOpen(true)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150"
-            style={{
-              background: 'linear-gradient(135deg, #4F46E5 0%, #6366F1 100%)',
-              color: '#fff',
-              boxShadow: '0 2px 8px rgba(79,70,229,0.35)',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(79,70,229,0.5)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(79,70,229,0.35)'; (e.currentTarget as HTMLElement).style.transform = ''; }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            New Opportunity
-          </button>
-        </div>
+        
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
