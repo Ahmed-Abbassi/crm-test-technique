@@ -8,7 +8,7 @@ import { UpdateOpportunityDto } from './dto/update-opportunity.dto';
 import { OpportunityFiltersDto } from './dto/opportunity-filters.dto';
 import { Prisma, OpportunityStage } from '@prisma/client';
 
-interface OpportunityWithFlags {
+export interface OpportunityWithFlags {
   id: string;
   title: string;
   amount: number;

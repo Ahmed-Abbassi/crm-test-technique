@@ -5,39 +5,35 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import type { Opportunity, OpportunityStage } from '@/lib/types';
-import { ArrowLeft, Edit, Trash2, AlertTriangle } from 'lucide-react';
 
-const stageColors: Record<OpportunityStage, string> = {
-  LEAD: 'bg-gray-100 text-gray-800',
-  QUALIFIED: 'bg-blue-100 text-blue-800',
-  PROPOSAL: 'bg-amber-100 text-amber-800',
-  NEGOTIATION: 'bg-purple-100 text-purple-800',
-  WON: 'bg-green-100 text-green-800',
-  LOST: 'bg-red-100 text-red-800',
+const stageBadge: Record<OpportunityStage, string> = {
+  LEAD: 'bg-gray-100 text-gray-600',
+  QUALIFIED: 'bg-blue-50 text-blue-700',
+  PROPOSAL: 'bg-amber-50 text-amber-700',
+  NEGOTIATION: 'bg-purple-50 text-purple-700',
+  WON: 'bg-green-50 text-green-700',
+  LOST: 'bg-red-50 text-red-600',
 };
 
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function getInitials(name: string): string {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
 function SkeletonCard() {
   return (
-    <div className="space-y-4 animate-pulse">
-      <div className="h-8 bg-gray-200 rounded w-1/3" />
-      <div className="h-4 bg-gray-200 rounded w-1/2" />
-      <div className="h-4 bg-gray-200 rounded w-2/3" />
-      <div className="h-4 bg-gray-200 rounded w-1/4" />
+    <div className="animate-pulse space-y-4">
+      <div className="h-6 bg-gray-100 rounded w-1/3" />
+      <div className="h-4 bg-gray-100 rounded w-1/2" />
+      <div className="h-4 bg-gray-100 rounded w-2/3" />
+      <div className="h-4 bg-gray-100 rounded w-1/4" />
     </div>
   );
 }
@@ -58,19 +54,14 @@ export default function OpportunityDetailPage() {
       const response = await api.opportunities.get(params.id as string);
       setOpportunity(response.data);
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else {
-        setError('Failed to load opportunity.');
-      }
+      if (err instanceof ApiError) setError(err.message);
+      else setError('Failed to load opportunity.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [params.id]);
+  useEffect(() => { fetchData(); }, [params.id]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -78,9 +69,7 @@ export default function OpportunityDetailPage() {
       await api.opportunities.delete(params.id as string);
       router.push('/opportunities');
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-      }
+      if (err instanceof ApiError) setError(err.message);
       setDeleting(false);
       setShowDeleteConfirm(false);
     }
@@ -88,10 +77,8 @@ export default function OpportunityDetailPage() {
 
   if (loading) {
     return (
-      <div>
-        <div className="mb-6">
-          <div className="h-4 bg-gray-200 rounded w-24 animate-pulse" />
-        </div>
+      <div className="px-8 py-8 max-w-5xl mx-auto">
+        <div className="mb-6"><div className="h-4 bg-gray-100 rounded w-24 animate-pulse" /></div>
         <SkeletonCard />
       </div>
     );
@@ -99,23 +86,15 @@ export default function OpportunityDetailPage() {
 
   if (error) {
     return (
-      <div>
-        <Link
-          href="/opportunities"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Back to opportunities
+      <div className="px-8 py-8 max-w-5xl mx-auto">
+        <Link href="/opportunities" className="inline-flex items-center text-sm text-gray-400 hover:text-gray-600 mb-6">
+          <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+          Back
         </Link>
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
           <div className="flex items-center justify-between">
-            <p className="text-red-800 text-sm">{error}</p>
-            <button
-              onClick={fetchData}
-              className="text-sm text-red-600 hover:text-red-800 underline"
-            >
-              Retry
-            </button>
+            <p className="text-sm text-red-700">{error}</p>
+            <button onClick={fetchData} className="text-sm font-medium text-red-600 hover:text-red-800">Retry</button>
           </div>
         </div>
       </div>
@@ -126,222 +105,146 @@ export default function OpportunityDetailPage() {
 
   const client = opportunity.client;
   const clientName = client
-    ? client.type === 'COMPANY'
-      ? client.companyName
-      : `${client.firstName} ${client.lastName}`
+    ? client.type === 'COMPANY' ? client.companyName : `${client.firstName} ${client.lastName}`
     : 'Unknown';
 
   const daysOverdue = opportunity.isLate
-    ? Math.floor(
-        (new Date().getTime() - new Date(opportunity.expectedCloseDate).getTime()) /
-          (1000 * 60 * 60 * 24),
-      )
-    : 0;
+    ? Math.floor((new Date().getTime() - new Date(opportunity.expectedCloseDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
   const daysStagnant = opportunity.isStagnant
-    ? Math.floor(
-        (new Date().getTime() - new Date(opportunity.lastStageChange).getTime()) /
-          (1000 * 60 * 60 * 24),
-      )
-    : 0;
+    ? Math.floor((new Date().getTime() - new Date(opportunity.lastStageChange).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
   return (
-    <div>
+    <div className="px-8 py-8 max-w-5xl mx-auto">
       {/* Back link */}
-      <Link
-        href="/opportunities"
-        className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-6"
-      >
-        <ArrowLeft className="w-4 h-4 mr-1" />
+      <Link href="/opportunities" className="inline-flex items-center text-sm text-gray-400 hover:text-gray-600 mb-6">
+        <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
         Back to opportunities
       </Link>
 
       {/* Problematic warning banner */}
       {(opportunity.isLate || opportunity.isStagnant) && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+        <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+          <span className="text-lg flex-shrink-0">⚠️</span>
           <div>
-            <p className="text-sm font-medium text-red-800">
-              This opportunity needs attention
-            </p>
+            <p className="text-sm font-medium text-red-800">This opportunity needs attention</p>
             <ul className="text-sm text-red-700 mt-1 list-disc list-inside">
-              {opportunity.isLate && (
-                <li>
-                  Expected close date was {formatDate(opportunity.expectedCloseDate)} —{' '}
-                  {daysOverdue} {daysOverdue === 1 ? 'day' : 'days'} overdue
-                </li>
-              )}
-              {opportunity.isStagnant && (
-                <li>
-                  No stage change in {daysStagnant} days (last change:{' '}
-                  {formatDate(opportunity.lastStageChange)})
-                </li>
-              )}
+              {opportunity.isLate && <li>Expected close date was {formatDate(opportunity.expectedCloseDate)} — {daysOverdue} {daysOverdue === 1 ? 'day' : 'days'} overdue</li>}
+              {opportunity.isStagnant && <li>No progress in {daysStagnant} days (last change: {formatDate(opportunity.lastStageChange)})</li>}
             </ul>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {opportunity.title}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Created {formatDate(opportunity.createdAt)}
-          </p>
+          <h1 className="text-xl font-semibold text-gray-900">{opportunity.title}</h1>
+          <p className="text-sm text-gray-400 mt-1">Created {formatDate(opportunity.createdAt)}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            href={`/opportunities/${opportunity.id}/edit`}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-          >
-            <Edit className="w-4 h-4 mr-2" />
+          <Link href={`/opportunities/${opportunity.id}/edit`}
+            className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
             Edit
           </Link>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="inline-flex items-center px-3 py-2 border border-red-300 text-red-700 rounded-lg text-sm hover:bg-red-50 transition-colors"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
+          <button onClick={() => setShowDeleteConfirm(true)}
+            className="inline-flex items-center px-3 py-2 border border-red-200 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors">
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
             Delete
           </button>
         </div>
       </div>
 
-      {/* Opportunity details */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-              Amount
-            </label>
-            <p className="text-lg font-semibold text-gray-900">
-              {formatCurrency(opportunity.amount)}
-            </p>
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-              Stage
-            </label>
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                stageColors[opportunity.stage]
-              }`}
-            >
-              {opportunity.stage}
-            </span>
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-              Expected Close Date
-            </label>
-            <p className="text-sm text-gray-900">
-              {formatDate(opportunity.expectedCloseDate)}
-            </p>
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-              Last Stage Change
-            </label>
-            <p className="text-sm text-gray-900">
-              {formatDate(opportunity.lastStageChange)}
-            </p>
-          </div>
-          {opportunity.notes && (
-            <div className="col-span-2">
-              <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-                Notes
-              </label>
-              <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                {opportunity.notes}
-              </p>
+      {/* Two-column layout */}
+      <div className="flex gap-8">
+        {/* Left column - Opportunity details */}
+        <div className="flex-1">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</p>
+                <p className="text-lg font-semibold text-gray-900 mt-0.5">{formatCurrency(opportunity.amount)}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Stage</p>
+                <div className="mt-1"><StageBadge stage={opportunity.stage} /></div>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Expected close date</p>
+                <p className="text-sm text-gray-900 mt-0.5">{formatDate(opportunity.expectedCloseDate)}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Last stage change</p>
+                <p className="text-sm text-gray-900 mt-0.5">{formatDate(opportunity.lastStageChange)}</p>
+              </div>
+              {opportunity.notes && (
+                <div className="col-span-2">
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Notes</p>
+                  <p className="text-sm text-gray-900 mt-0.5 whitespace-pre-wrap">{opportunity.notes}</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* Client card */}
-      {client && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Client
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-                Name
-              </label>
-              <p className="text-sm text-gray-900">{clientName}</p>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-                Type
-              </label>
-              <p className="text-sm text-gray-900">
-                {client.type === 'COMPANY' ? 'Company' : 'Individual'}
-              </p>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-                Email
-              </label>
-              <p className="text-sm text-gray-900">{client.email}</p>
-            </div>
-            {client.phone && (
-              <div>
-                <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-                  Phone
-                </label>
-                <p className="text-sm text-gray-900">{client.phone}</p>
+        {/* Right column - Client card */}
+        {client && (
+          <div className="w-80">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-medium text-gray-600">{getInitials(clientName || '?')}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{clientName}</p>
+                  <p className="text-xs text-gray-400">{client.type === 'COMPANY' ? 'Company' : 'Individual'}</p>
+                </div>
               </div>
-            )}
-            {client.type === 'COMPANY' && client.industry && (
-              <div>
-                <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-                  Industry
-                </label>
-                <p className="text-sm text-gray-900">{client.industry}</p>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Email</p>
+                  <p className="text-sm text-gray-900 mt-0.5">{client.email}</p>
+                </div>
+                {client.phone && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Phone</p>
+                    <p className="text-sm text-gray-900 mt-0.5">{client.phone}</p>
+                  </div>
+                )}
+                {client.type === 'COMPANY' && client.industry && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Industry</p>
+                    <p className="text-sm text-gray-900 mt-0.5">{client.industry}</p>
+                  </div>
+                )}
+                {client.city && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Location</p>
+                    <p className="text-sm text-gray-900 mt-0.5">{client.city}{client.country ? `, ${client.country}` : ''}</p>
+                  </div>
+                )}
               </div>
-            )}
-            {client.city && client.country && (
-              <div>
-                <label className="block text-xs text-gray-500 uppercase tracking-wider mb-1">
-                  Location
-                </label>
-                <p className="text-sm text-gray-900">
-                  {client.city}, {client.country}
-                </p>
-              </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Delete opportunity
-            </h3>
-            <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete "{opportunity.title}"? This
-              action cannot be undone.
-            </p>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm mx-4 shadow-lg">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Delete opportunity</h3>
+            <p className="text-sm text-gray-500 mb-6">Are you sure you want to delete "{opportunity.title}"? This action cannot be undone.</p>
             <div className="flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50"
-              >
+              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
+              <button onClick={handleDelete} disabled={deleting} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50">
                 {deleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
@@ -349,5 +252,13 @@ export default function OpportunityDetailPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function StageBadge({ stage }: { stage: OpportunityStage }) {
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${stageBadge[stage]}`}>
+      {stage}
+    </span>
   );
 }

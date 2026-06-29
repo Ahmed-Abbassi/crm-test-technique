@@ -10,7 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { OpportunitiesService } from './opportunities.service';
+import { OpportunitiesService, OpportunityWithFlags } from './opportunities.service';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
 import { UpdateOpportunityDto } from './dto/update-opportunity.dto';
 import { OpportunityFiltersDto } from './dto/opportunity-filters.dto';
