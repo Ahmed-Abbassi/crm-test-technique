@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import type { PipelineSummary, Opportunity } from '@/lib/types';
 import {
-  MetricCard, ErrorBanner, StageBadge, LateBadge, StagnantBadge,
+  MetricCard, ErrorBanner, StageBadge,
   formatCurrency, formatCurrencyFull, formatDate, formatRelative, clientName,
   STAGE_CONFIG, STAGE_ORDER, PrimaryButton,
 } from '@/components/ui';
 
 function PipelineFunnel({ data }: { data: PipelineSummary['byStage'] }) {
-  const activeStages = STAGE_ORDER.filter(s => s !== 'WON' && s !== 'LOST');
+  const activeStages = STAGE_ORDER.filter(s => s !== 'CLOSED_WON' && s !== 'CLOSED_LOST');
   const max = Math.max(...activeStages.map(s => data.find(d => d.stage === s)?.totalValue ?? 0), 1);
 
   return (
@@ -46,29 +46,8 @@ function PipelineFunnel({ data }: { data: PipelineSummary['byStage'] }) {
   );
 }
 
-function ProblematicRow({ opp }: { opp: Opportunity }) {
-  return (
-    <Link href={`/opportunities/${opp.id}`} className="flex items-center gap-3 px-4 py-3 rounded-lg border transition-all hover:shadow-sm"
-      style={{ background: '#FFFBF0', borderColor: '#F0D000', borderLeftWidth: 3, borderLeftColor: '#CA8501' }}>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{opp.title}</p>
-        <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          {opp.client ? clientName(opp.client) : '—'} · Close {formatDate(opp.expectedCloseDate)}
-        </p>
-      </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <StageBadge stage={opp.stage} />
-        {opp.isLate && <LateBadge />}
-        {opp.isStagnant && <StagnantBadge />}
-        <span className="text-sm font-bold font-data" style={{ color: 'var(--text-primary)' }}>{formatCurrencyFull(opp.amount)}</span>
-      </div>
-    </Link>
-  );
-}
-
 export default function DashboardPage() {
   const [summary, setSummary] = useState<PipelineSummary | null>(null);
-  const [problematic, setProblematic] = useState<Opportunity[]>([]);
   const [recent, setRecent] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,13 +56,11 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [pipelineRes, probRes, recentRes] = await Promise.all([
+      const [pipelineRes, recentRes] = await Promise.all([
         api.opportunities.pipeline(),
-        api.opportunities.list({ isProblematic: true, limit: 5 }),
         api.opportunities.list({ limit: 5, page: 1 }),
       ]);
       setSummary(pipelineRes.data);
-      setProblematic(probRes.data);
       setRecent(recentRes.data);
     } catch (err) {
       if (err instanceof ApiError) setError(err.message);
@@ -198,7 +175,7 @@ export default function DashboardPage() {
                 { href: '/opportunities/new', label: 'Log a new deal', icon: '💼', desc: 'Add to pipeline' },
                 { href: '/clients/new', label: 'Add a client', icon: '🏢', desc: 'Company or individual' },
                 { href: '/pipeline', label: 'View pipeline board', icon: '📊', desc: 'Kanban view' },
-                { href: '/opportunities?isProblematic=true', label: 'Review stagnant deals', icon: '⚠️', desc: `${summary?.problematicCount ?? 0} need attention` },
+                { href: '/opportunities', label: 'Review all deals', icon: '⚠️', desc: `${summary?.totalCount ?? 0} total deals` },
               ].map(item => (
                 <Link key={item.href} href={item.href}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all hover:shadow-sm"
@@ -216,36 +193,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Problematic deals */}
-        {(problematic.length > 0 || loading) && (
-          <div className="rounded-lg border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-            <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-orange-400" />
-                <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Deals Needing Attention</h2>
-                {summary && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: '#FDECEC', color: 'var(--danger)' }}>
-                    {summary.problematicCount}
-                  </span>
-                )}
-              </div>
-              <Link href="/opportunities?isProblematic=true" className="text-xs font-semibold hover:underline" style={{ color: 'var(--brand-blue)' }}>
-                View all →
-              </Link>
-            </div>
-            <div className="p-4 space-y-2">
-              {loading ? (
-                [1, 2, 3].map(i => (
-                  <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: '#F3F2F1' }} />
-                ))
-              ) : problematic.length === 0 ? (
-                <p className="text-sm text-center py-6" style={{ color: 'var(--text-muted)' }}>No problematic deals — great work! 🎉</p>
-              ) : (
-                problematic.slice(0, 5).map(opp => <ProblematicRow key={opp.id} opp={opp} />)
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Recent opportunities */}
         <div className="rounded-lg border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>

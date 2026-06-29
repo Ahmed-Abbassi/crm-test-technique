@@ -7,19 +7,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
 enum ClientType {
   COMPANY
   INDIVIDUAL
 }
 
-enum OpportunityStage {
-  LEAD
+enum LeadStatus {
+  NEW
+  CONTACTED
   QUALIFIED
+  DISQUALIFIED
+}
+
+enum OpportunityStage {
+  PROSPECTING
   PROPOSAL
   NEGOTIATION
-  WON
-  LOST
+  CLOSED_WON
+  CLOSED_LOST
 }
+
+// ─── Lead ────────────────────────────────────────────────────────────────────
+// Represents an unqualified potential customer.
+// When QUALIFIED → converted into Client + (optional) Opportunity.
+// After conversion, the Lead is closed and no longer used for active sales.
+
+model Lead {
+  id        String     @id @default(cuid())
+  status    LeadStatus @default(NEW)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Contact info
+  email       String   @unique
+  phone       String?
+  firstName   String?
+  lastName    String?
+  companyName String?
+  title       String?  // e.g. "CTO at Acme"
+  source      String?  // e.g. "Website", "Referral", "LinkedIn"
+  notes       String?
+
+  // Conversion tracking
+  convertedAt  DateTime?
+  convertedToClientId String?       @unique
+  convertedToClient   Client?       @relation("LeadConversion", fields: [convertedToClientId], references: [id])
+  convertedToOpportunityId String?  @unique
+  convertedToOpportunity   Opportunity? @relation("OpportunityConversion", fields: [convertedToOpportunityId], references: [id])
+}
+
+// ─── Client (Account) ────────────────────────────────────────────────────────
+// Represents a real company or person doing business with us.
+// Created via Lead conversion OR manual creation.
+// Contains no sales stages — that's what Opportunities are for.
 
 model Client {
   id          String      @id @default(cuid())
@@ -33,30 +75,40 @@ model Client {
   city        String?
   country     String?
 
-  // Company-only (null for individuals)
+  // Company fields
   companyName     String?
   industry        String?
   website         String?
   employeeCount   Int?
 
-  // Individual-only (null for companies)
+  // Individual fields
   firstName   String?
   lastName    String?
 
+  // Relations
   opportunities Opportunity[]
+  convertedFromLead Lead?       @relation("LeadConversion")
 }
 
+// ─── Opportunity ─────────────────────────────────────────────────────────────
+// Represents ONLY an active deal. Created after Lead conversion or directly.
+// Stages follow the correct sales pipeline:
+//   PROSPECTING → PROPOSAL → NEGOTIATION → CLOSED_WON | CLOSED_LOST
+
 model Opportunity {
-  id              String            @id @default(cuid())
+  id              String           @id @default(cuid())
   title           String
-  amount          Decimal           @db.Decimal(12, 2)
-  expectedCloseDate DateTime
+  amount          Decimal          @db.Decimal(12, 2)
+  expectedCloseDate DateTime?
   stage           OpportunityStage
   notes           String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  lastStageChange DateTime          @default(now())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  lastStageChange DateTime         @default(now())
 
   clientId        String
-  client          Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client          Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // If created via lead conversion
+  convertedFromLead Lead? @relation("OpportunityConversion")
 }

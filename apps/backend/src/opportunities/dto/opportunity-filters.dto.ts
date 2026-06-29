@@ -1,31 +1,23 @@
 import {
   IsOptional,
   IsEnum,
-  IsBoolean,
   IsInt,
   Min,
   Max,
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { OpportunityStage, ClientType } from '@prisma/client';
 
 export class OpportunityFiltersDto {
   @IsOptional()
   @IsEnum(OpportunityStage)
+  @Transform(({ value }) => (value === '' ? undefined : value))
   stage?: OpportunityStage;
 
   @IsOptional()
   @IsEnum(ClientType)
+  @Transform(({ value }) => (value === '' ? undefined : value))
   clientType?: ClientType;
-
-  @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    return value;
-  })
-  isProblematic?: boolean;
 
   @IsOptional()
   @IsInt()

@@ -9,6 +9,11 @@ import type {
   UpdateOpportunityDto,
   CreateClientDto,
   UpdateClientDto,
+  Lead,
+  CreateLeadDto,
+  UpdateLeadDto,
+  ConvertLeadDto,
+  LeadFilters,
 } from './types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -66,8 +71,6 @@ export const api = {
       const params = new URLSearchParams();
       if (filters?.stage) params.set('stage', filters.stage);
       if (filters?.clientType) params.set('clientType', filters.clientType);
-      if (filters?.isProblematic !== undefined)
-        params.set('isProblematic', String(filters.isProblematic));
       if (filters?.page) params.set('page', String(filters.page));
       if (filters?.limit) params.set('limit', String(filters.limit));
       const qs = params.toString();
@@ -93,6 +96,36 @@ export const api = {
       request<ApiResponse<PipelineSummary>>(
         '/opportunities/pipeline/summary',
       ),
+  },
+  leads: {
+    list: (filters?: LeadFilters) => {
+      const params = new URLSearchParams();
+      if (filters?.status) params.set('status', filters.status);
+      if (filters?.search) params.set('search', filters.search);
+      if (filters?.page) params.set('page', String(filters.page));
+      if (filters?.limit) params.set('limit', String(filters.limit));
+      const qs = params.toString();
+      return request<ApiResponse<Lead[]>>(`/leads${qs ? `?${qs}` : ''}`);
+    },
+    get: (id: string) =>
+      request<ApiResponse<Lead>>(`/leads/${id}`),
+    create: (data: CreateLeadDto) =>
+      request<ApiResponse<Lead>>('/leads', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: UpdateLeadDto) =>
+      request<ApiResponse<Lead>>(`/leads/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<void>(`/leads/${id}`, { method: 'DELETE' }),
+    convert: (id: string, data: ConvertLeadDto) =>
+      request<ApiResponse<{ client: Client; opportunity?: Opportunity }>>(`/leads/${id}/convert`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
   },
   clients: {
     list: (params?: ClientListParams) => {

@@ -1,0 +1,168 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateLeadDto } from './dto/create-lead.dto';
+import { UpdateLeadDto } from './dto/update-lead.dto';
+import { ConvertLeadDto } from './dto/convert-lead.dto';
+import { Prisma } from '@prisma/client';
+export declare class LeadsService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    create(dto: CreateLeadDto): Promise<{
+        id: string;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string;
+        phone: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        companyName: string | null;
+        title: string | null;
+        source: string | null;
+        notes: string | null;
+        convertedAt: Date | null;
+        convertedToClientId: string | null;
+        convertedToOpportunityId: string | null;
+    }>;
+    findAll(params: {
+        page: number;
+        limit: number;
+        status?: string;
+        search?: string;
+    }): Promise<{
+        items: {
+            id: string;
+            status: import("@prisma/client").$Enums.LeadStatus;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            phone: string | null;
+            firstName: string | null;
+            lastName: string | null;
+            companyName: string | null;
+            title: string | null;
+            source: string | null;
+            notes: string | null;
+            convertedAt: Date | null;
+            convertedToClientId: string | null;
+            convertedToOpportunityId: string | null;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
+    }>;
+    findOne(id: string): Promise<{
+        convertedToClient: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            phone: string | null;
+            firstName: string | null;
+            lastName: string | null;
+            companyName: string | null;
+            type: import("@prisma/client").$Enums.ClientType;
+            address: string | null;
+            city: string | null;
+            country: string | null;
+            industry: string | null;
+            website: string | null;
+            employeeCount: number | null;
+        } | null;
+        convertedToOpportunity: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            title: string;
+            notes: string | null;
+            amount: Prisma.Decimal;
+            expectedCloseDate: Date | null;
+            stage: import("@prisma/client").$Enums.OpportunityStage;
+            lastStageChange: Date;
+            clientId: string;
+        } | null;
+    } & {
+        id: string;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string;
+        phone: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        companyName: string | null;
+        title: string | null;
+        source: string | null;
+        notes: string | null;
+        convertedAt: Date | null;
+        convertedToClientId: string | null;
+        convertedToOpportunityId: string | null;
+    }>;
+    update(id: string, dto: UpdateLeadDto): Promise<{
+        id: string;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string;
+        phone: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        companyName: string | null;
+        title: string | null;
+        source: string | null;
+        notes: string | null;
+        convertedAt: Date | null;
+        convertedToClientId: string | null;
+        convertedToOpportunityId: string | null;
+    }>;
+    remove(id: string): Promise<void>;
+    convert(id: string, dto: ConvertLeadDto): Promise<{
+        convertedToClient: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            phone: string | null;
+            firstName: string | null;
+            lastName: string | null;
+            companyName: string | null;
+            type: import("@prisma/client").$Enums.ClientType;
+            address: string | null;
+            city: string | null;
+            country: string | null;
+            industry: string | null;
+            website: string | null;
+            employeeCount: number | null;
+        } | null;
+        convertedToOpportunity: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            title: string;
+            notes: string | null;
+            amount: Prisma.Decimal;
+            expectedCloseDate: Date | null;
+            stage: import("@prisma/client").$Enums.OpportunityStage;
+            lastStageChange: Date;
+            clientId: string;
+        } | null;
+    } & {
+        id: string;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string;
+        phone: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        companyName: string | null;
+        title: string | null;
+        source: string | null;
+        notes: string | null;
+        convertedAt: Date | null;
+        convertedToClientId: string | null;
+        convertedToOpportunityId: string | null;
+    }>;
+}

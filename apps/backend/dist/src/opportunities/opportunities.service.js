@@ -17,25 +17,6 @@ let OpportunitiesService = class OpportunitiesService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    computeProblematicFlags(opportunity) {
-        const now = new Date();
-        const closedStages = [client_1.OpportunityStage.WON, client_1.OpportunityStage.LOST];
-        const isClosed = closedStages.includes(opportunity.stage);
-        const isLate = !isClosed && new Date(opportunity.expectedCloseDate) < now;
-        const stagnantThreshold = new Date();
-        stagnantThreshold.setDate(stagnantThreshold.getDate() - 14);
-        const isStagnant = !isClosed && new Date(opportunity.lastStageChange) < stagnantThreshold;
-        return { isLate, isStagnant };
-    }
-    mapWithFlags(opportunity) {
-        const { isLate, isStagnant } = this.computeProblematicFlags(opportunity);
-        return {
-            ...opportunity,
-            amount: Number(opportunity.amount),
-            isLate,
-            isStagnant,
-        };
-    }
     async create(dto) {
         const client = await this.prisma.client.findUnique({
             where: { id: dto.clientId },
@@ -43,11 +24,11 @@ let OpportunitiesService = class OpportunitiesService {
         if (!client) {
             throw new common_1.NotFoundException(`Client with ID ${dto.clientId} not found`);
         }
-        const opportunity = await this.prisma.opportunity.create({
+        return this.prisma.opportunity.create({
             data: {
                 title: dto.title,
                 amount: dto.amount,
-                expectedCloseDate: new Date(dto.expectedCloseDate),
+                expectedCloseDate: dto.expectedCloseDate ? new Date(dto.expectedCloseDate) : null,
                 stage: dto.stage,
                 notes: dto.notes,
                 clientId: dto.clientId,
@@ -55,43 +36,30 @@ let OpportunitiesService = class OpportunitiesService {
             },
             include: { client: true },
         });
-        return this.mapWithFlags(opportunity);
     }
     async findAll(filters) {
-        const { page, limit, stage, clientType, isProblematic } = filters;
+        const { page, limit, stage, clientType } = filters;
         const skip = ((page ?? 1) - 1) * (limit ?? 20);
         const where = {};
         if (stage) {
             where.stage = stage;
         }
         if (clientType) {
-            where.client = {
-                type: clientType,
-            };
+            where.client = { type: clientType };
         }
-        let opportunities = await this.prisma.opportunity.findMany({
-            where,
-            skip,
-            take: limit,
-            orderBy: { createdAt: 'desc' },
-            include: {
-                client: true,
-            },
-        });
-        const total = await this.prisma.opportunity.count({ where });
-        const mapped = opportunities.map((o) => this.mapWithFlags(o));
-        let filtered = mapped;
-        if (isProblematic === true) {
-            filtered = mapped.filter((o) => o.isLate || o.isStagnant);
-        }
+        const [opportunities, total] = await Promise.all([
+            this.prisma.opportunity.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+                include: { client: true },
+            }),
+            this.prisma.opportunity.count({ where }),
+        ]);
         return {
-            items: filtered,
-            meta: {
-                total,
-                page: page ?? 1,
-                limit: limit ?? 20,
-                totalPages: Math.ceil(total / (limit ?? 20)),
-            },
+            items: opportunities,
+            meta: { total, page: page ?? 1, limit: limit ?? 20, totalPages: Math.ceil(total / (limit ?? 20)) },
         };
     }
     async findOne(id) {
@@ -102,18 +70,14 @@ let OpportunitiesService = class OpportunitiesService {
         if (!opportunity) {
             throw new common_1.NotFoundException(`Opportunity with ID ${id} not found`);
         }
-        return this.mapWithFlags(opportunity);
+        return opportunity;
     }
     async update(id, dto) {
-        const existing = await this.prisma.opportunity.findUnique({
-            where: { id },
-        });
+        const existing = await this.prisma.opportunity.findUnique({ where: { id } });
         if (!existing) {
             throw new common_1.NotFoundException(`Opportunity with ID ${id} not found`);
         }
-        const updateData = {
-            ...dto,
-        };
+        const updateData = { ...dto };
         if (dto.stage && dto.stage !== existing.stage) {
             updateData.lastStageChange = new Date();
         }
@@ -128,39 +92,36 @@ let OpportunitiesService = class OpportunitiesService {
             data: updateData,
             include: { client: true },
         });
-        return this.mapWithFlags(opportunity);
+        return opportunity;
     }
     async remove(id) {
-        const existing = await this.prisma.opportunity.findUnique({
-            where: { id },
-        });
+        const existing = await this.prisma.opportunity.findUnique({ where: { id } });
         if (!existing) {
             throw new common_1.NotFoundException(`Opportunity with ID ${id} not found`);
         }
-        await this.prisma.opportunity.delete({
-            where: { id },
-        });
+        await this.prisma.opportunity.delete({ where: { id } });
     }
     async getPipelineSummary() {
         const allOpps = await this.prisma.opportunity.findMany();
+        const activeStages = [
+            client_1.OpportunityStage.PROSPECTING,
+            client_1.OpportunityStage.PROPOSAL,
+            client_1.OpportunityStage.NEGOTIATION,
+        ];
         const totalPipelineValue = allOpps
-            .filter((o) => o.stage !== client_1.OpportunityStage.WON &&
-            o.stage !== client_1.OpportunityStage.LOST)
+            .filter((o) => activeStages.includes(o.stage))
             .reduce((sum, o) => sum + Number(o.amount), 0);
         const totalCount = allOpps.length;
-        const wonOpps = allOpps.filter((o) => o.stage === client_1.OpportunityStage.WON);
-        const lostOpps = allOpps.filter((o) => o.stage === client_1.OpportunityStage.LOST);
+        const wonOpps = allOpps.filter((o) => o.stage === client_1.OpportunityStage.CLOSED_WON);
+        const lostOpps = allOpps.filter((o) => o.stage === client_1.OpportunityStage.CLOSED_LOST);
         const wonValue = wonOpps.reduce((sum, o) => sum + Number(o.amount), 0);
         const lostCount = lostOpps.length;
         const winRate = wonOpps.length + lostOpps.length > 0
             ? (wonOpps.length / (wonOpps.length + lostOpps.length)) * 100
             : 0;
         const averageDealSize = allOpps.length > 0
-            ? allOpps.reduce((sum, o) => sum + Number(o.amount), 0) /
-                allOpps.length
+            ? allOpps.reduce((sum, o) => sum + Number(o.amount), 0) / allOpps.length
             : 0;
-        const allWithFlags = allOpps.map((o) => this.mapWithFlags(o));
-        const problematicCount = allWithFlags.filter((o) => o.isLate || o.isStagnant).length;
         const stages = Object.values(client_1.OpportunityStage);
         const byStage = stages.map((stage) => {
             const stageOpps = allOpps.filter((o) => o.stage === stage);
@@ -177,7 +138,7 @@ let OpportunitiesService = class OpportunitiesService {
             lostCount,
             winRate: Math.round(winRate * 100) / 100,
             averageDealSize: Math.round(averageDealSize * 100) / 100,
-            problematicCount,
+            problematicCount: 0,
             byStage,
         };
     }

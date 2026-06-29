@@ -1,17 +1,25 @@
-import type { OpportunityStage } from '@/lib/types';
+import type { OpportunityStage, LeadStatus } from '@/lib/types';
 
 // ─── Stage Config ────────────────────────────────────────────────────────────
 
 export const STAGE_CONFIG: Record<OpportunityStage, { label: string; color: string; bg: string; dot: string }> = {
-  LEAD:        { label: 'Lead',        color: '#514F4D', bg: '#F3F2F1', dot: '#706E6B' },
-  QUALIFIED:   { label: 'Qualified',   color: '#0176D3', bg: '#D8EDFF', dot: '#0176D3' },
-  PROPOSAL:    { label: 'Proposal',    color: '#A47800', bg: '#FEF5C3', dot: '#CA8501' },
-  NEGOTIATION: { label: 'Negotiation', color: '#6B3FA0', bg: '#F4E8FF', dot: '#8B5CF6' },
-  WON:         { label: 'Won',         color: '#2E844A', bg: '#EEF4EE', dot: '#22C55E' },
-  LOST:        { label: 'Lost',        color: '#BA0517', bg: '#FDECEC', dot: '#EF4444' },
+  PROSPECTING:  { label: 'Prospecting',  color: '#514F4D', bg: '#F3F2F1', dot: '#706E6B' },
+  PROPOSAL:     { label: 'Proposal',     color: '#0176D3', bg: '#D8EDFF', dot: '#0176D3' },
+  NEGOTIATION:  { label: 'Negotiation',  color: '#6B3FA0', bg: '#F4E8FF', dot: '#8B5CF6' },
+  CLOSED_WON:   { label: 'Closed Won',   color: '#2E844A', bg: '#EEF4EE', dot: '#22C55E' },
+  CLOSED_LOST:  { label: 'Closed Lost',  color: '#BA0517', bg: '#FDECEC', dot: '#EF4444' },
 };
 
-export const STAGE_ORDER: OpportunityStage[] = ['LEAD', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST'];
+export const STAGE_ORDER: OpportunityStage[] = ['PROSPECTING', 'PROPOSAL', 'NEGOTIATION', 'CLOSED_WON', 'CLOSED_LOST'];
+
+// ─── Lead Status Config ──────────────────────────────────────────────────────
+
+export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; bg: string }> = {
+  NEW:          { label: 'New',          color: '#514F4D', bg: '#F3F2F1' },
+  CONTACTED:    { label: 'Contacted',    color: '#0176D3', bg: '#D8EDFF' },
+  QUALIFIED:    { label: 'Qualified',    color: '#2E844A', bg: '#EEF4EE' },
+  DISQUALIFIED: { label: 'Disqualified', color: '#BA0517', bg: '#FDECEC' },
+};
 
 // ─── Stage Badge ─────────────────────────────────────────────────────────────
 
@@ -28,28 +36,16 @@ export function StageBadge({ stage }: { stage: OpportunityStage }) {
   );
 }
 
-// ─── Alert Badges ────────────────────────────────────────────────────────────
+// ─── Lead Status Badge ───────────────────────────────────────────────────────
 
-export function LateBadge() {
+export function LeadStatusBadge({ status }: { status: LeadStatus }) {
+  const cfg = LEAD_STATUS_CONFIG[status];
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
-      style={{ color: '#BA0517', background: '#FDECEC', border: '1px solid #F4C3C3' }}>
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-        <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
-      </svg>
-      Late
-    </span>
-  );
-}
-
-export function StagnantBadge() {
-  return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
-      style={{ color: '#A47800', background: '#FEF5C3', border: '1px solid #F0D000' }}>
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-        <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
-      </svg>
-      Stagnant
+    <span
+      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+      style={{ color: cfg.color, background: cfg.bg }}
+    >
+      {cfg.label}
     </span>
   );
 }
@@ -136,11 +132,7 @@ export function PrimaryButton({
     cursor: disabled ? 'not-allowed' : 'pointer' as const,
   };
   if (href) {
-    return (
-      <a href={href} className={cls} style={style}>
-        {children}
-      </a>
-    );
+    return <a href={href} className={cls} style={style}>{children}</a>;
   }
   return (
     <button type={type} onClick={onClick} disabled={disabled} className={cls} style={style}
@@ -365,7 +357,8 @@ export function formatCurrencyFull(amount: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(amount);
 }
 
-export function formatDate(dateStr: string): string {
+export function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—';
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import type { Opportunity, OpportunityStage, PaginationMeta } from '@/lib/types';
-import { StageBadge, LateBadge, StagnantBadge, formatCurrencyFull, formatDate, SkeletonRow, EmptyState, ErrorBanner, PageHeader } from '@/components/ui';
+import { StageBadge, formatCurrencyFull, formatDate, SkeletonRow, EmptyState, ErrorBanner, PageHeader } from '@/components/ui';
 import NewOpportunityDrawer from './NewOpportunityDrawer';
 
 export default function OpportunitiesPage() {
@@ -13,7 +13,7 @@ export default function OpportunitiesPage() {
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState({ stage: '', clientType: '', isProblematic: false, page: 1 });
+  const [filters, setFilters] = useState({ stage: '', clientType: '', page: 1 });
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
@@ -23,7 +23,6 @@ export default function OpportunitiesPage() {
       const response = await api.opportunities.list({
         stage: filters.stage ? (filters.stage as OpportunityStage) : undefined,
         clientType: filters.clientType as any || undefined,
-        isProblematic: filters.isProblematic || undefined,
         page: filters.page,
         limit: 20,
       });
@@ -70,12 +69,11 @@ export default function OpportunitiesPage() {
               onChange={(e) => setFilters((p) => ({ ...p, stage: e.target.value, page: 1 }))}
               className="border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
               <option value="">All stages</option>
-              <option value="LEAD">Lead</option>
-              <option value="QUALIFIED">Qualified</option>
+              <option value="PROSPECTING">Prospecting</option>
               <option value="PROPOSAL">Proposal</option>
               <option value="NEGOTIATION">Negotiation</option>
-              <option value="WON">Won</option>
-              <option value="LOST">Lost</option>
+              <option value="CLOSED_WON">Closed Won</option>
+              <option value="CLOSED_LOST">Closed Lost</option>
             </select>
 
             <select value={filters.clientType}
@@ -86,12 +84,6 @@ export default function OpportunitiesPage() {
               <option value="INDIVIDUAL">Individuals</option>
             </select>
 
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input type="checkbox" checked={filters.isProblematic}
-                onChange={(e) => setFilters((p) => ({ ...p, isProblematic: e.target.checked, page: 1 }))}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-              <span className="text-sm text-gray-600">Problematic only</span>
-            </label>
           </div>
         </div>
 
@@ -126,11 +118,8 @@ export default function OpportunitiesPage() {
                 opportunities.map((opp) => (
                   <tr key={opp.id} onClick={() => router.push(`/opportunities/${opp.id}`)}
                     className="cursor-pointer transition-colors border-b last:border-0"
-                    style={{
-                      borderColor: 'var(--border-light)',
-                      ...((opp.isLate || opp.isStagnant) ? { borderLeft: '4px solid var(--orange)', background: '#FFFBF0' } : {})
-                    }}
-                    onMouseEnter={e => { if (!(opp.isLate || opp.isStagnant)) (e.currentTarget as HTMLElement).style.background = '#FAFAF9'; }}
+                    style={{ borderColor: 'var(--border-light)' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FAFAF9'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ''; }}>
                     <td className="px-5 py-4 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{opp.title}</td>
                     <td className="px-5 py-4 text-sm" style={{ color: 'var(--brand-blue)' }}>
@@ -138,12 +127,9 @@ export default function OpportunitiesPage() {
                     </td>
                     <td className="px-5 py-4 text-sm font-bold font-data" style={{ color: 'var(--text-primary)' }}>{formatCurrencyFull(opp.amount)}</td>
                     <td className="px-5 py-4"><StageBadge stage={opp.stage} /></td>
-                    <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{formatDate(opp.expectedCloseDate)}</td>
+                    <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{opp.expectedCloseDate ? formatDate(opp.expectedCloseDate) : '—'}</td>
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        {opp.isLate && <LateBadge />}
-                        {opp.isStagnant && <StagnantBadge />}
-                      </div>
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>—</span>
                     </td>
                   </tr>
                 ))

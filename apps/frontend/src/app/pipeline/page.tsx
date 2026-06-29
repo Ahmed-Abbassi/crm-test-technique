@@ -7,21 +7,11 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { formatCurrencyFull, formatCurrency, PageHeader, ErrorBanner, STAGE_CONFIG, STAGE_ORDER } from '@/components/ui';
 
 const stageColors: Record<string, string> = {
-  LEAD: '#706E6B',
-  QUALIFIED: '#0176D3',
+  PROSPECTING: '#706E6B',
   PROPOSAL: '#CA8501',
   NEGOTIATION: '#8B5CF6',
-  WON: '#22C55E',
-  LOST: '#EF4444',
-};
-
-const stageBorders: Record<string, string> = {
-  LEAD: 'border-l-[#706E6B]',
-  QUALIFIED: 'border-l-[#0176D3]',
-  PROPOSAL: 'border-l-[#CA8501]',
-  NEGOTIATION: 'border-l-[#8B5CF6]',
-  WON: 'border-l-[#22C55E]',
-  LOST: 'border-l-[#EF4444]',
+  CLOSED_WON: '#22C55E',
+  CLOSED_LOST: '#EF4444',
 };
 
 function MetricCard({ label, value, problematic }: { label: string; value: string; problematic?: boolean }) {

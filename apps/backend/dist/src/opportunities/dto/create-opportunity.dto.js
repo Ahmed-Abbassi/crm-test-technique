@@ -27,8 +27,8 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateOpportunityDto.prototype, "amount", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateOpportunityDto.prototype, "expectedCloseDate", void 0);
 __decorate([

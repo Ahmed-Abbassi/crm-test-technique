@@ -1,12 +1,33 @@
 export type ClientType = 'COMPANY' | 'INDIVIDUAL';
 
+export type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'DISQUALIFIED';
+
 export type OpportunityStage =
-  | 'LEAD'
-  | 'QUALIFIED'
+  | 'PROSPECTING'
   | 'PROPOSAL'
   | 'NEGOTIATION'
-  | 'WON'
-  | 'LOST';
+  | 'CLOSED_WON'
+  | 'CLOSED_LOST';
+
+export interface Lead {
+  id: string;
+  status: LeadStatus;
+  email: string;
+  phone: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  companyName: string | null;
+  title: string | null;
+  source: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  convertedAt: string | null;
+  convertedToClientId: string | null;
+  convertedToClient?: Client | null;
+  convertedToOpportunityId: string | null;
+  convertedToOpportunity?: Opportunity | null;
+}
 
 export interface Client {
   id: string;
@@ -25,13 +46,14 @@ export interface Client {
   createdAt: string;
   updatedAt: string;
   opportunities?: Opportunity[];
+  convertedFromLead?: Lead | null;
 }
 
 export interface Opportunity {
   id: string;
   title: string;
   amount: number;
-  expectedCloseDate: string;
+  expectedCloseDate: string | null;
   stage: OpportunityStage;
   notes: string | null;
   createdAt: string;
@@ -39,8 +61,7 @@ export interface Opportunity {
   lastStageChange: string;
   clientId: string;
   client?: Client;
-  isLate: boolean;
-  isStagnant: boolean;
+  convertedFromLead?: Lead | null;
 }
 
 export interface PaginationMeta {
@@ -58,7 +79,13 @@ export interface ApiResponse<T> {
 export interface OpportunityFilters {
   stage?: OpportunityStage;
   clientType?: ClientType;
-  isProblematic?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+export interface LeadFilters {
+  status?: LeadStatus;
+  search?: string;
   page?: number;
   limit?: number;
 }
@@ -88,7 +115,7 @@ export interface PipelineSummary {
 export interface CreateOpportunityDto {
   title: string;
   amount: number;
-  expectedCloseDate: string;
+  expectedCloseDate?: string;
   stage: OpportunityStage;
   notes?: string;
   clientId: string;
@@ -109,12 +136,10 @@ export interface CreateClientDto {
   address?: string;
   city?: string;
   country?: string;
-  // Company fields
   companyName?: string;
   industry?: string;
   website?: string;
   employeeCount?: number;
-  // Individual fields
   firstName?: string;
   lastName?: string;
 }
@@ -132,4 +157,35 @@ export interface UpdateClientDto {
   employeeCount?: number;
   firstName?: string;
   lastName?: string;
+}
+
+export interface CreateLeadDto {
+  email: string;
+  phone?: string;
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
+  title?: string;
+  source?: string;
+  notes?: string;
+  status?: LeadStatus;
+}
+
+export interface UpdateLeadDto {
+  email?: string;
+  phone?: string;
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
+  title?: string;
+  source?: string;
+  notes?: string;
+  status?: LeadStatus;
+}
+
+export interface ConvertLeadDto {
+  createOpportunity?: boolean;
+  opportunityTitle?: string;
+  opportunityAmount?: number;
+  expectedCloseDate?: string;
 }

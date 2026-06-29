@@ -15,7 +15,7 @@ const opportunitySchema = z.object({
   amount: z.number({ invalid_type_error: 'Amount must be a number' }).positive('Amount must be positive')
     .or(z.string().transform((val) => parseFloat(val))).refine((val) => val > 0, 'Amount must be positive'),
   expectedCloseDate: z.string().min(1, 'Expected close date is required'),
-  stage: z.enum(['LEAD', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST'], { required_error: 'Stage is required' }),
+  stage: z.enum(['PROSPECTING', 'PROPOSAL', 'NEGOTIATION', 'CLOSED_WON', 'CLOSED_LOST'], { required_error: 'Stage is required' }),
   notes: z.string().optional(),
 });
 
@@ -29,7 +29,7 @@ export default function NewOpportunityPage() {
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<OpportunityFormData>({
     resolver: zodResolver(opportunitySchema),
-    defaultValues: { stage: 'LEAD' },
+    defaultValues: { stage: 'PROSPECTING' },
   });
 
   useEffect(() => {
@@ -115,12 +115,11 @@ export default function NewOpportunityPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
             <select {...register('stage')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent">
-              <option value="LEAD">Lead</option>
-              <option value="QUALIFIED">Qualified</option>
+              <option value="PROSPECTING">Prospecting</option>
               <option value="PROPOSAL">Proposal</option>
               <option value="NEGOTIATION">Negotiation</option>
-              <option value="WON">Won</option>
-              <option value="LOST">Lost</option>
+              <option value="CLOSED_WON">Closed Won</option>
+              <option value="CLOSED_LOST">Closed Lost</option>
             </select>
             {errors.stage && <p className="text-xs text-red-500 mt-1">{errors.stage.message}</p>}
           </div>

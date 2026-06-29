@@ -10,7 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { OpportunitiesService, OpportunityWithFlags } from './opportunities.service';
+import { OpportunitiesService } from './opportunities.service';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
 import { UpdateOpportunityDto } from './dto/update-opportunity.dto';
 import { OpportunityFiltersDto } from './dto/opportunity-filters.dto';
@@ -43,10 +43,7 @@ export class OpportunitiesController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateOpportunityDto,
-  ) {
+  update(@Param('id') id: string, @Body() dto: UpdateOpportunityDto) {
     return this.opportunitiesService.update(id, dto);
   }
 

@@ -7,18 +7,17 @@ import { api, ApiError } from '@/lib/api';
 import type { Opportunity, OpportunityStage } from '@/lib/types';
 
 // ─── Stage pipeline config ────────────────────────────────────────────────────
-const PIPELINE_STAGES: OpportunityStage[] = ['LEAD', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION', 'WON'];
+const PIPELINE_STAGES: OpportunityStage[] = ['PROSPECTING', 'PROPOSAL', 'NEGOTIATION', 'CLOSED_WON'];
 
 const stageConfig: Record<
   OpportunityStage,
   { label: string; activeColor: string; activeBg: string; activeBorder: string; textColor: string }
 > = {
-  LEAD:        { label: 'Lead',        activeColor: '#64748b', activeBg: '#f1f5f9', activeBorder: '#94a3b8', textColor: '#475569' },
-  QUALIFIED:   { label: 'Qualified',   activeColor: '#2563eb', activeBg: '#eff6ff', activeBorder: '#3b82f6', textColor: '#1d4ed8' },
-  PROPOSAL:    { label: 'Proposal',    activeColor: '#d97706', activeBg: '#fffbeb', activeBorder: '#f59e0b', textColor: '#b45309' },
-  NEGOTIATION: { label: 'Negotiation', activeColor: '#7c3aed', activeBg: '#f5f3ff', activeBorder: '#8b5cf6', textColor: '#6d28d9' },
-  WON:         { label: 'Won',         activeColor: '#16a34a', activeBg: '#f0fdf4', activeBorder: '#22c55e', textColor: '#15803d' },
-  LOST:        { label: 'Lost',        activeColor: '#dc2626', activeBg: '#fef2f2', activeBorder: '#f87171', textColor: '#b91c1c' },
+  PROSPECTING: { label: 'Prospecting',  activeColor: '#64748b', activeBg: '#f1f5f9', activeBorder: '#94a3b8', textColor: '#475569' },
+  PROPOSAL:    { label: 'Proposal',     activeColor: '#d97706', activeBg: '#fffbeb', activeBorder: '#f59e0b', textColor: '#b45309' },
+  NEGOTIATION: { label: 'Negotiation',  activeColor: '#7c3aed', activeBg: '#f5f3ff', activeBorder: '#8b5cf6', textColor: '#6d28d9' },
+  CLOSED_WON:  { label: 'Closed Won',   activeColor: '#16a34a', activeBg: '#f0fdf4', activeBorder: '#22c55e', textColor: '#15803d' },
+  CLOSED_LOST: { label: 'Closed Lost',  activeColor: '#dc2626', activeBg: '#fef2f2', activeBorder: '#f87171', textColor: '#b91c1c' },
 };
 
 function formatCurrency(amount: number): string {
@@ -65,7 +64,7 @@ function StagePipeline({
   updating: boolean;
 }) {
   const currentIdx = getStageIndex(current);
-  const isLost = current === 'LOST';
+  const isLost = current === 'CLOSED_LOST';
 
   return (
     <div style={{ marginBottom: 28 }}>
@@ -196,15 +195,15 @@ function StagePipeline({
           );
         })}
 
-        {/* LOST — separate pill */}
+        {/* CLOSED_LOST — separate pill */}
         <button
           className="lost-btn"
-          onDoubleClick={() => !updating && onStageClick('LOST')}
+          onDoubleClick={() => !updating && onStageClick('CLOSED_LOST')}
           disabled={updating}
           style={{
-            background: isLost ? stageConfig.LOST.activeBg : 'transparent',
-            color: isLost ? stageConfig.LOST.textColor : '#94a3b8',
-            borderColor: isLost ? stageConfig.LOST.activeBorder : '#e2e8f0',
+            background: isLost ? stageConfig.CLOSED_LOST.activeBg : 'transparent',
+            color: isLost ? stageConfig.CLOSED_LOST.textColor : '#94a3b8',
+            borderColor: isLost ? stageConfig.CLOSED_LOST.activeBorder : '#e2e8f0',
           }}
         >
           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -321,10 +320,6 @@ export default function OpportunityDetailPage() {
     ? client.type === 'COMPANY' ? client.companyName! : `${client.firstName} ${client.lastName}`
     : null;
 
-  const daysOverdue = opportunity.isLate
-    ? Math.floor((Date.now() - new Date(opportunity.expectedCloseDate).getTime()) / 86400000) : 0;
-  const daysStagnant = opportunity.isStagnant
-    ? Math.floor((Date.now() - new Date(opportunity.lastStageChange).getTime()) / 86400000) : 0;
 
   const stageCfg = stageConfig[opportunity.stage];
 
@@ -335,27 +330,6 @@ export default function OpportunityDetailPage() {
       {/* Back */}
       <BackLink />
 
-      {/* Alert banner */}
-      {(opportunity.isLate || opportunity.isStagnant) && (
-        <div style={{ marginBottom: 20, padding: '12px 16px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-          <span style={{ fontSize: 16, lineHeight: 1.5 }}>⚠️</span>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#92400e', margin: '0 0 4px' }}>Needs attention</p>
-            <ul style={{ margin: 0, paddingLeft: 18, listStyle: 'disc' }}>
-              {opportunity.isLate && (
-                <li style={{ fontSize: 12, color: '#b45309' }}>
-                  Close date passed {formatDate(opportunity.expectedCloseDate)} — {daysOverdue}d overdue
-                </li>
-              )}
-              {opportunity.isStagnant && (
-                <li style={{ fontSize: 12, color: '#b45309' }}>
-                  Stagnant for {daysStagnant} days (last change {formatDate(opportunity.lastStageChange)})
-                </li>
-              )}
-            </ul>
-          </div>
-        </div>
-      )}
 
       {/* Page header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
@@ -431,24 +405,14 @@ export default function OpportunityDetailPage() {
           {/* 2-col info grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px 32px' }}>
             <Field label="Expected Close Date">
-              <span style={{ color: opportunity.isLate ? '#dc2626' : '#1e293b' }}>
-                {formatDate(opportunity.expectedCloseDate)}
-                {opportunity.isLate && (
-                  <span style={{ marginLeft: 8, fontSize: 11.5, fontWeight: 600, color: '#dc2626', background: '#fef2f2', padding: '2px 7px', borderRadius: 4, border: '1px solid #fecaca' }}>
-                    {daysOverdue}d overdue
-                  </span>
-                )}
+              <span style={{ color: '#1e293b' }}>
+                {opportunity.expectedCloseDate ? formatDate(opportunity.expectedCloseDate) : '—'}
               </span>
             </Field>
 
             <Field label="Last Stage Change">
-              <span style={{ color: opportunity.isStagnant ? '#d97706' : '#1e293b' }}>
+              <span style={{ color: '#1e293b' }}>
                 {formatDate(opportunity.lastStageChange)}
-                {opportunity.isStagnant && (
-                  <span style={{ marginLeft: 8, fontSize: 11.5, fontWeight: 600, color: '#d97706', background: '#fffbeb', padding: '2px 7px', borderRadius: 4, border: '1px solid #fde68a' }}>
-                    {daysStagnant}d ago
-                  </span>
-                )}
               </span>
             </Field>
           </div>

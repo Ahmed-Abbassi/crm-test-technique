@@ -7,20 +7,20 @@ export declare class ClientsService {
     constructor(prisma: PrismaService);
     create(dto: CreateClientDto): Promise<{
         id: string;
-        type: import("@prisma/client").$Enums.ClientType;
         createdAt: Date;
         updatedAt: Date;
         email: string;
         phone: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        companyName: string | null;
+        type: import("@prisma/client").$Enums.ClientType;
         address: string | null;
         city: string | null;
         country: string | null;
-        companyName: string | null;
         industry: string | null;
         website: string | null;
         employeeCount: number | null;
-        firstName: string | null;
-        lastName: string | null;
     }>;
     findAll(params: {
         page: number;
@@ -30,20 +30,20 @@ export declare class ClientsService {
     }): Promise<{
         items: {
             id: string;
-            type: import("@prisma/client").$Enums.ClientType;
             createdAt: Date;
             updatedAt: Date;
             email: string;
             phone: string | null;
+            firstName: string | null;
+            lastName: string | null;
+            companyName: string | null;
+            type: import("@prisma/client").$Enums.ClientType;
             address: string | null;
             city: string | null;
             country: string | null;
-            companyName: string | null;
             industry: string | null;
             website: string | null;
             employeeCount: number | null;
-            firstName: string | null;
-            lastName: string | null;
         }[];
         meta: {
             total: number;
@@ -58,46 +58,46 @@ export declare class ClientsService {
             createdAt: Date;
             updatedAt: Date;
             title: string;
-            amount: Prisma.Decimal;
-            expectedCloseDate: Date;
-            stage: import("@prisma/client").$Enums.OpportunityStage;
             notes: string | null;
+            amount: Prisma.Decimal;
+            expectedCloseDate: Date | null;
+            stage: import("@prisma/client").$Enums.OpportunityStage;
             lastStageChange: Date;
             clientId: string;
         }[];
     } & {
         id: string;
-        type: import("@prisma/client").$Enums.ClientType;
         createdAt: Date;
         updatedAt: Date;
         email: string;
         phone: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        companyName: string | null;
+        type: import("@prisma/client").$Enums.ClientType;
         address: string | null;
         city: string | null;
         country: string | null;
-        companyName: string | null;
         industry: string | null;
         website: string | null;
         employeeCount: number | null;
-        firstName: string | null;
-        lastName: string | null;
     }>;
     update(id: string, dto: UpdateClientDto): Promise<{
         id: string;
-        type: import("@prisma/client").$Enums.ClientType;
         createdAt: Date;
         updatedAt: Date;
         email: string;
         phone: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        companyName: string | null;
+        type: import("@prisma/client").$Enums.ClientType;
         address: string | null;
         city: string | null;
         country: string | null;
-        companyName: string | null;
         industry: string | null;
         website: string | null;
         employeeCount: number | null;
-        firstName: string | null;
-        lastName: string | null;
     }>;
     remove(id: string): Promise<void>;
 }

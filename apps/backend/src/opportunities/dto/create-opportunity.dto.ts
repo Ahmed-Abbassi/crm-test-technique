@@ -7,7 +7,6 @@ import {
   IsDateString,
   MaxLength,
   Min,
-  Max,
 } from 'class-validator';
 import { OpportunityStage } from '@prisma/client';
 
@@ -24,9 +23,9 @@ export class CreateOpportunityDto {
   @Min(0.01, { message: 'Amount must be a positive number' })
   amount!: number;
 
+  @IsOptional()
   @IsDateString()
-  @IsNotEmpty()
-  expectedCloseDate!: string;
+  expectedCloseDate?: string;
 
   @IsEnum(OpportunityStage)
   @IsNotEmpty()
