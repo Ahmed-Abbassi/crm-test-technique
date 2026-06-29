@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import type { Opportunity, OpportunityStage, PaginationMeta } from '@/lib/types';
 import { StageBadge, LateBadge, StagnantBadge, formatCurrencyFull, formatDate, SkeletonRow, EmptyState, ErrorBanner, PageHeader } from '@/components/ui';
+import NewOpportunityDrawer from './NewOpportunityDrawer';
 
 export default function OpportunitiesPage() {
   const router = useRouter();
@@ -14,6 +14,7 @@ export default function OpportunitiesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({ stage: '', clientType: '', isProblematic: false, page: 1 });
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -38,20 +39,25 @@ export default function OpportunitiesPage() {
 
   const totalText = useMemo(() => meta ? `${meta.total} total` : undefined, [meta]);
 
+  const newOpportunityButton = (
+    <button
+      onClick={() => setDrawerOpen(true)}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
+      style={{ background: 'var(--brand-blue)', color: '#fff' }}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      New opportunity
+    </button>
+  );
+
   return (
     <div>
       <PageHeader
         title="Opportunities"
         subtitle={totalText}
-        actions={
-          <Link href="/opportunities/new" className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
-            style={{ background: 'var(--brand-blue)', color: '#fff' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            New opportunity
-          </Link>
-        }
+        actions={newOpportunityButton}
       />
 
       <div className="px-8 py-6 space-y-6 max-w-[1400px]">
@@ -114,10 +120,7 @@ export default function OpportunitiesPage() {
               ) : opportunities.length === 0 ? (
                 <tr><td colSpan={6}>
                   <EmptyState title="No opportunities yet" description="Create your first opportunity to start tracking deals."
-                    action={<Link href="/opportunities/new" className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold" style={{ background: 'var(--brand-blue)', color: '#fff' }}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                      New opportunity
-                    </Link>}
+                    action={newOpportunityButton}
                   /></td></tr>
               ) : (
                 opportunities.map((opp) => (
@@ -162,6 +165,12 @@ export default function OpportunitiesPage() {
           </div>
         )}
       </div>
+
+      <NewOpportunityDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onCreated={fetchData}
+      />
     </div>
   );
 }

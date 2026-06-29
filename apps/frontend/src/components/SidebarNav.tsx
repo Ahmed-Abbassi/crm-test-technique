@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import NewClientDrawer from '@/app/clients/Newclientdrawer';
+import NewOpportunityDrawer from '@/app/opportunities/NewOpportunityDrawer';
 
 const navItems = [
   {
@@ -44,6 +47,8 @@ const navItems = [
 
 export default function SidebarNav() {
   const pathname = usePathname();
+  const [clientDrawerOpen, setClientDrawerOpen] = useState(false);
+  const [opportunityDrawerOpen, setOpportunityDrawerOpen] = useState(false);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard' || pathname === '/';
@@ -51,70 +56,117 @@ export default function SidebarNav() {
   };
 
   return (
-    <aside
-      className="fixed left-0 top-0 h-screen w-[220px] flex flex-col z-50"
-      style={{ background: 'var(--sidebar-bg)' }}
-    >
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: 'var(--brand-blue-mid)' }}
-          >
-            <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-white font-semibold text-sm leading-tight">Nexus CRM</p>
-            <p className="text-xs leading-tight" style={{ color: 'var(--sidebar-text)' }}>Sales Suite</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--sidebar-text)', opacity: 0.6 }}>
-          Main
-        </p>
-        {navItems.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
-              style={{
-                color: active ? 'var(--sidebar-text-active)' : 'var(--sidebar-text)',
-                background: active ? 'var(--sidebar-active)' : 'transparent',
-              }}
-              onMouseEnter={(e) => {
-                if (!active) (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover)';
-              }}
-              onMouseLeave={(e) => {
-                if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent';
-              }}
+    <>
+      <aside
+        className="fixed left-0 top-0 h-screen w-[220px] flex flex-col z-50"
+        style={{ background: 'var(--sidebar-bg)' }}
+      >
+        {/* Logo */}
+        <div className="px-5 py-5 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: 'var(--brand-blue-mid)' }}
             >
-              {item.icon}
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div className="px-5 py-4 border-t border-white/10">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-blue-400 flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-semibold">SL</span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-white text-xs font-medium truncate">Sales Lead</p>
-            <p className="text-[10px] truncate" style={{ color: 'var(--sidebar-text)' }}>sales@company.com</p>
+              <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm leading-tight">Nexus CRM</p>
+              <p className="text-xs leading-tight" style={{ color: 'var(--sidebar-text)' }}>Sales Suite</p>
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--sidebar-text)', opacity: 0.6 }}>
+            Main
+          </p>
+          {navItems.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
+                style={{
+                  color: active ? 'var(--sidebar-text-active)' : 'var(--sidebar-text)',
+                  background: active ? 'var(--sidebar-active)' : 'transparent',
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            );
+          })}
+
+          {/* Quick create section
+          <div className="pt-6">
+            <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--sidebar-text)', opacity: 0.6 }}>
+              Quick create
+            </p>
+
+            <button
+              onClick={() => setOpportunityDrawerOpen(true)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
+              style={{ color: 'var(--sidebar-text)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              New opportunity
+            </button>
+
+            <button
+              onClick={() => setClientDrawerOpen(true)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150"
+              style={{ color: 'var(--sidebar-text)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              New client
+            </button>
+          </div>
+           */}
+        </nav>
+
+        {/* Footer */}
+        <div className="px-5 py-4 border-t border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-blue-400 flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-semibold">SL</span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-white text-xs font-medium truncate">Sales Lead</p>
+              <p className="text-[10px] truncate" style={{ color: 'var(--sidebar-text)' }}>sales@company.com</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Drawers */}
+      <NewClientDrawer
+        open={clientDrawerOpen}
+        onClose={() => setClientDrawerOpen(false)}
+        onCreated={() => setClientDrawerOpen(false)}
+      />
+      <NewOpportunityDrawer
+        open={opportunityDrawerOpen}
+        onClose={() => setOpportunityDrawerOpen(false)}
+      />
+    </>
   );
 }
