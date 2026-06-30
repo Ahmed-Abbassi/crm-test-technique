@@ -3,7 +3,7 @@ import './globals.css';
 import RootClientLayout from './RootClientLayout';
 
 export const metadata: Metadata = {
-  title: 'Nexus CRM',
+  title: 'OneClick CRM',
   description: 'Enterprise CRM Platform',
 };
 

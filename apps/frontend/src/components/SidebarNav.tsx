@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import NewClientDrawer from '@/app/clients/Newclientdrawer';
 import NewOpportunityDrawer from '@/app/opportunities/NewOpportunityDrawer';
+import Logo from "../images/logo.png"
 
 const navItems = [
   {
@@ -72,23 +73,10 @@ export default function SidebarNav() {
       >
         {/* Logo */}
         <div className="px-5 pt-6 pb-5" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
-          <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-                boxShadow: '0 4px 12px rgba(79,70,229,0.4)',
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
-                <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke="white" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-white font-bold text-sm leading-tight tracking-tight">Nexus CRM</p>
-              <p className="text-[11px] leading-tight font-medium" style={{ color: 'var(--sidebar-text)' }}>Sales Suite</p>
-            </div>
-          </div>
+          
+              <img src={Logo.src} alt="Logo" className="rounded-full" style={{width:"150px"}}/>
+            
+          
         </div>
 
         {/* Quick create button */}

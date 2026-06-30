@@ -29,7 +29,7 @@ const STAGE_CONFIG: Record<BoardStage, { label: string; order: number; colorClas
   PROPOSAL:     { label: 'Proposal',     order: 2, colorClass: 'border-t-amber-500',   badgeClass: 'bg-amber-100 text-amber-700' },
   NEGOTIATION:  { label: 'Negotiation',  order: 3, colorClass: 'border-t-purple-500',  badgeClass: 'bg-purple-100 text-purple-700' },
   CLOSED_WON:   { label: 'Closed Won',   order: 4, colorClass: 'border-t-green-500',   badgeClass: 'bg-green-100 text-green-700' },
-  CLOSED_LOST:  { label: 'Closed Lost',  order: 5, colorClass: 'border-t-gray-400',    badgeClass: 'bg-gray-100 text-gray-500' },
+  CLOSED_LOST:  { label: 'Closed Lost',  order: 5, colorClass: 'border-t-red-400',    badgeClass: 'bg-red-100 text-red-500' },
 };
 
 const STAGE_ORDER: BoardStage[] = ['PROSPECTING', 'PROPOSAL', 'NEGOTIATION', 'CLOSED_WON', 'CLOSED_LOST'];

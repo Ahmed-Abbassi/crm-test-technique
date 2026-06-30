@@ -132,9 +132,7 @@ export default function OpportunitiesPage() {
                     <td className="px-5 py-4 text-sm font-bold font-data" style={{ color: 'var(--text-primary)' }}>{formatCurrencyFull(opp.amount)}</td>
                     <td className="px-5 py-4"><StageBadge stage={opp.stage} /></td>
                     <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{opp.expectedCloseDate ? formatDate(opp.expectedCloseDate) : '—'}</td>
-                    <td className="px-5 py-4">
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>—</span>
-                    </td>
+                    <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{ formatDate(opp.updatedAt)}</td>
                   </tr>
                 ))
               )}
