@@ -1,8 +1,9 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/opportunities/page": "app/opportunities/page.js",
-  "/leads/page": "app/leads/page.js",
-  "/opportunities/[id]/page": "app/opportunities/[id]/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/clients/page": "app/clients/page.js",
-  "/leads/[id]/page": "app/leads/[id]/page.js",
-  "/pipeline/page": "app/pipeline/page.js"
+  "/pipeline/page": "app/pipeline/page.js",
+  "/leads/page": "app/leads/page.js",
+  "/leads/[id]/page": "app/leads/[id]/page.js"
 }
