@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import type { Opportunity, OpportunityStage } from '@/lib/types';
+import { useToast } from '@/components/ToastProvider';
 
 // ─── Stage pipeline config ────────────────────────────────────────────────────
 const PIPELINE_STAGES: OpportunityStage[] = ['PROSPECTING', 'PROPOSAL', 'NEGOTIATION', 'CLOSED_WON'];
@@ -170,7 +171,7 @@ function StagePipeline({
               className="stage-step"
               onDoubleClick={() => !updating && onStageClick(stage)}
               disabled={updating}
-              title={`Set stage to ${cfg.label}`}
+              title={`x2 Click -> Set stage to ${cfg.label}`}
               style={{
                 background: bg,
                 color,
@@ -198,6 +199,7 @@ function StagePipeline({
         {/* CLOSED_LOST — separate pill */}
         <button
           className="lost-btn"
+          title="x2 Click -> Set stage to Closed Lost"
           onDoubleClick={() => !updating && onStageClick('CLOSED_LOST')}
           disabled={updating}
           style={{
@@ -250,6 +252,7 @@ function Divider() {
 export default function OpportunityDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const toast = useToast();
   const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -280,8 +283,11 @@ export default function OpportunityDetailPage() {
     try {
       const response = await api.opportunities.update(params.id as string, { stage });
       setOpportunity(response.data);
+      toast.success(`Deal stage updated to ${stage}`);
     } catch (err) {
-      setStageError(err instanceof ApiError ? err.message : 'Failed to update stage.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to update stage.';
+      setStageError(msg);
+      toast.error(msg);
     } finally {
       setUpdatingStage(false);
     }
@@ -291,9 +297,12 @@ export default function OpportunityDetailPage() {
     setDeleting(true);
     try {
       await api.opportunities.delete(params.id as string);
+      toast.success('Opportunity deleted successfully');
       router.push('/opportunities');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Delete failed.');
+      const msg = err instanceof ApiError ? err.message : 'Delete failed.';
+      setError(msg);
+      toast.error(msg);
       setDeleting(false);
       setShowDeleteConfirm(false);
     }

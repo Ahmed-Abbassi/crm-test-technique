@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { api, ApiError } from '@/lib/api';
 import Drawer from '../clients/Drawer';
+import { useToast } from '@/components/ToastProvider';
 
 interface ConvertLeadDrawerProps {
   leadId: string;
@@ -12,6 +13,7 @@ interface ConvertLeadDrawerProps {
 }
 
 export default function ConvertLeadDrawer({ leadId, open, onClose, onConverted }: ConvertLeadDrawerProps) {
+  const toast = useToast();
   const [createOpportunity, setCreateOpportunity] = useState(true);
   const [opportunityTitle, setOpportunityTitle] = useState('');
   const [opportunityAmount, setOpportunityAmount] = useState('');
@@ -39,11 +41,13 @@ export default function ConvertLeadDrawer({ leadId, open, onClose, onConverted }
         opportunityAmount: createOpportunity && opportunityAmount ? parseFloat(opportunityAmount) : undefined,
         expectedCloseDate: createOpportunity ? expectedCloseDate || undefined : undefined,
       });
+      toast.success('Lead converted to client successfully');
       onConverted();
       resetAndClose();
     } catch (err) {
-      if (err instanceof ApiError) setSubmitError(err.message);
-      else setSubmitError('Failed to convert lead.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to convert lead.';
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

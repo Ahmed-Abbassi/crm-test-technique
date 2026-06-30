@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { api, ApiError } from '@/lib/api';
 import type { Client } from '@/lib/types';
 import Drawer from '../clients/Drawer';
+import { useToast } from '@/components/ToastProvider';
 
 const opportunitySchema = z.object({
   title: z.string().min(1, 'Title is required').max(120, 'Title must be at most 120 characters'),
@@ -29,6 +30,7 @@ interface NewOpportunityDrawerProps {
 
 export default function NewOpportunityDrawer({ open, onClose, onCreated }: NewOpportunityDrawerProps) {
   const router = useRouter();
+  const toast = useToast();
   const [clients, setClients] = useState<Client[]>([]);
   const [clientsLoading, setClientsLoading] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -61,11 +63,13 @@ export default function NewOpportunityDrawer({ open, onClose, onCreated }: NewOp
         ...data,
         amount: typeof data.amount === 'string' ? parseFloat(data.amount) : data.amount,
       });
+      toast.success('Opportunity created successfully');
       onCreated?.();
       resetAndClose();
     } catch (err) {
-      if (err instanceof ApiError) setSubmitError(err.message);
-      else setSubmitError('Failed to create opportunity.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to create opportunity.';
+      setSubmitError(msg);
+      toast.error(msg);
     }
   };
 

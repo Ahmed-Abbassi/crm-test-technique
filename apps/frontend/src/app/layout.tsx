@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import SidebarNav from '@/components/SidebarNav';
+import RootClientLayout from './RootClientLayout';
 
 export const metadata: Metadata = {
   title: 'Nexus CRM',
@@ -11,12 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <div className="flex min-h-screen">
-          <SidebarNav />
-          <main className="flex-1 ml-[220px] min-h-screen">
-            {children}
-          </main>
-        </div>
+        <RootClientLayout>{children}</RootClientLayout>
       </body>
     </html>
   );

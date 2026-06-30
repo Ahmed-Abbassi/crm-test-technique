@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api, ApiError } from '@/lib/api';
+import { useToast } from '@/components/ToastProvider';
 
 const opportunitySchema = z.object({
   title: z.string().min(1, 'Title is required').max(120, 'Title must be at most 120 characters'),
@@ -22,6 +23,7 @@ type OpportunityFormData = z.infer<typeof opportunitySchema>;
 export default function EditOpportunityPage() {
   const params = useParams();
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -48,10 +50,12 @@ export default function EditOpportunityPage() {
     setSubmitError(null);
     try {
       const response = await api.opportunities.update(params.id as string, { ...data, amount: typeof data.amount === 'string' ? parseFloat(data.amount) : data.amount });
+      toast.success('Opportunity updated successfully');
       router.push(`/opportunities/${response.data.id}`);
     } catch (err) {
-      if (err instanceof ApiError) setSubmitError(err.message);
-      else setSubmitError('Failed to update opportunity.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to update opportunity.';
+      setSubmitError(msg);
+      toast.error(msg);
     }
   };
 

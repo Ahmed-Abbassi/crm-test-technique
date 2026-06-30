@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { api, ApiError } from '@/lib/api';
 import type { Lead } from '@/lib/types';
 import Drawer from '../clients/Drawer';
+import { useToast } from '@/components/ToastProvider';
 
 interface EditLeadDrawerProps {
   lead: Lead;
@@ -13,6 +14,7 @@ interface EditLeadDrawerProps {
 }
 
 export default function EditLeadDrawer({ lead, open, onClose, onSaved }: EditLeadDrawerProps) {
+  const toast = useToast();
   const [email, setEmail] = useState(lead.email);
   const [phone, setPhone] = useState(lead.phone || '');
   const [firstName, setFirstName] = useState(lead.firstName || '');
@@ -53,10 +55,12 @@ export default function EditLeadDrawer({ lead, open, onClose, onSaved }: EditLea
         source: source || undefined,
         notes: notes || undefined,
       });
+      toast.success('Lead updated successfully');
       onSaved();
     } catch (err) {
-      if (err instanceof ApiError) setSubmitError(err.message);
-      else setSubmitError('Failed to update lead.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to update lead.';
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

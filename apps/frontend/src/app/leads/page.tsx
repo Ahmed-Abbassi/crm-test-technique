@@ -7,11 +7,13 @@ import type { Lead, LeadStatus, PaginationMeta } from '@/lib/types';
 import {
   LeadStatusBadge, formatDate, SkeletonRow, EmptyState, ErrorBanner, PageHeader,
 } from '@/components/ui';
+import { useToast } from '@/components/ToastProvider';
 import NewLeadDrawer from './NewLeadDrawer';
 import ConvertLeadDrawer from './ConvertLeadDrawer';
 
 export default function LeadsPage() {
   const router = useRouter();
+  const toast = useToast();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,8 +35,9 @@ export default function LeadsPage() {
       setLeads(response.data);
       if (response.meta) setMeta(response.meta);
     } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
-      else setError('Failed to load leads.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to load leads.';
+      setError(msg);
+      toast.error(msg);
     } finally { setLoading(false); }
   }, [filters]);
 
@@ -63,10 +66,11 @@ export default function LeadsPage() {
     if (!confirm('Delete this lead?')) return;
     try {
       await api.leads.delete(id);
+      toast.success('Lead deleted successfully');
       fetchData();
     } catch (err) {
-      if (err instanceof ApiError) alert(err.message);
-      else alert('Failed to delete lead.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to delete lead.';
+      toast.error(msg);
     }
   };
 
@@ -132,24 +136,24 @@ export default function LeadsPage() {
                 leads.map((lead) => {
                   const name = [lead.firstName, lead.lastName].filter(Boolean).join(' ') || lead.email;
                   return (
-                    <tr key={lead.id} 
+                    <tr key={lead.id} onClick={() => router.push(`/leads/${lead.id}`)}
                       className="cursor-pointer transition-colors border-b last:border-0 hover:bg-gray-50"
                       style={{ borderColor: 'var(--border-light)' }}>
-                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{name}</td>
-                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.email}</td>
-                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.companyName || '—'}</td>
-                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4"><LeadStatusBadge status={lead.status} /></td>
-                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{formatDate(lead.createdAt)}</td>
+                      <td className="px-5 py-4 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{name}</td>
+                      <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.email}</td>
+                      <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.companyName || '—'}</td>
+                      <td className="px-5 py-4"><LeadStatusBadge status={lead.status} /></td>
+                      <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{formatDate(lead.createdAt)}</td>
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {lead.status === 'QUALIFIED' && !lead.convertedAt && (
-                            <button onClick={() => setConvertLeadId(lead.id)}
+                            <button onClick={(e) => { e.stopPropagation(); setConvertLeadId(lead.id); }}
                               className="px-3 py-1 text-xs font-semibold rounded transition-colors"
                               style={{ background: '#EEF4EE', color: '#2E844A' }}>
                               Convert
                             </button>
                           )}
-                          <button onClick={() => handleDelete(lead.id)}
+                          <button onClick={(e) => { e.stopPropagation(); handleDelete(lead.id); }}
                             className="px-3 py-1 text-xs font-semibold rounded transition-colors"
                             style={{ background: '#FDECEC', color: '#BA0517' }}>
                             Delete

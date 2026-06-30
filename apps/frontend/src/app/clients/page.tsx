@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import type { Client, PaginationMeta } from '@/lib/types';
 import { SkeletonRow, EmptyState, ErrorBanner, PageHeader } from '@/components/ui';
+import { useToast } from '@/components/ToastProvider';
 import NewclientDrawer from './Newclientdrawer';
 
 export default function ClientsPage() {
   const router = useRouter();
+  const toast = useToast();
   const [clients, setClients] = useState<Client[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,8 +28,9 @@ export default function ClientsPage() {
       setClients(response.data);
       if (response.meta) setMeta(response.meta);
     } catch (err) {
-      if (err instanceof ApiError) setError(err.message);
-      else setError('Failed to load clients.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to load clients.';
+      setError(msg);
+      toast.error(msg);
     } finally { setLoading(false); }
   }, [typeFilter, search, page]);
 
@@ -36,6 +39,7 @@ export default function ClientsPage() {
   // After creating a client from the drawer, refresh the list so the new
   // row (and updated total count) show up immediately.
   const handleClientCreated = (_client: Client) => {
+    toast.success('Client created successfully');
     setPage(1);
     fetchData();
   };

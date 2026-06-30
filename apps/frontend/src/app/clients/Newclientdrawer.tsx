@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { api, ApiError } from '@/lib/api';
 import Drawer from './Drawer';
 import type { Client } from '@/lib/types';
+import { useToast } from '@/components/ToastProvider';
 
 interface NewClientDrawerProps {
   open: boolean;
@@ -18,6 +19,7 @@ const EMPTY_FORM = {
 };
 
 export default function NewClientDrawer({ open, onClose, onCreated }: NewClientDrawerProps) {
+  const toast = useToast();
   const [type, setType] = useState<'COMPANY' | 'INDIVIDUAL'>('COMPANY');
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -53,11 +55,13 @@ export default function NewClientDrawer({ open, onClose, onCreated }: NewClientD
         data.lastName = formData.lastName;
       }
       const response = await api.clients.create(data);
+      toast.success('Client created successfully');
       onCreated(response.data);
       resetAndClose();
     } catch (err) {
-      if (err instanceof ApiError) setSubmitError(err.message);
-      else setSubmitError('Failed to create client.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to create client.';
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

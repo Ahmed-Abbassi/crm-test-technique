@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { api, ApiError } from '@/lib/api';
 import Drawer from '../clients/Drawer';
+import { useToast } from '@/components/ToastProvider';
 
 interface NewLeadDrawerProps {
   open: boolean;
@@ -22,6 +23,7 @@ const EMPTY_FORM = {
 };
 
 export default function NewLeadDrawer({ open, onClose, onCreated }: NewLeadDrawerProps) {
+  const toast = useToast();
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -47,11 +49,13 @@ export default function NewLeadDrawer({ open, onClose, onCreated }: NewLeadDrawe
         source: formData.source || undefined,
         notes: formData.notes || undefined,
       });
+      toast.success('Lead created successfully');
       onCreated();
       resetAndClose();
     } catch (err) {
-      if (err instanceof ApiError) setSubmitError(err.message);
-      else setSubmitError('Failed to create lead.');
+      const msg = err instanceof ApiError ? err.message : 'Failed to create lead.';
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
