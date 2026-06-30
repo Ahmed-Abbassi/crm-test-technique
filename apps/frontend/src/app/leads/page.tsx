@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import type { Lead, LeadStatus, PaginationMeta } from '@/lib/types';
 import {
@@ -10,6 +11,7 @@ import NewLeadDrawer from './NewLeadDrawer';
 import ConvertLeadDrawer from './ConvertLeadDrawer';
 
 export default function LeadsPage() {
+  const router = useRouter();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -130,14 +132,14 @@ export default function LeadsPage() {
                 leads.map((lead) => {
                   const name = [lead.firstName, lead.lastName].filter(Boolean).join(' ') || lead.email;
                   return (
-                    <tr key={lead.id}
-                      className="transition-colors border-b last:border-0 hover:bg-gray-50"
+                    <tr key={lead.id} 
+                      className="cursor-pointer transition-colors border-b last:border-0 hover:bg-gray-50"
                       style={{ borderColor: 'var(--border-light)' }}>
-                      <td className="px-5 py-4 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{name}</td>
-                      <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.email}</td>
-                      <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.companyName || '—'}</td>
-                      <td className="px-5 py-4"><LeadStatusBadge status={lead.status} /></td>
-                      <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{formatDate(lead.createdAt)}</td>
+                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{name}</td>
+                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.email}</td>
+                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.companyName || '—'}</td>
+                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4"><LeadStatusBadge status={lead.status} /></td>
+                      <td onClick={() => router.push(`/leads/${lead.id}`)} className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{formatDate(lead.createdAt)}</td>
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {lead.status === 'QUALIFIED' && !lead.convertedAt && (
