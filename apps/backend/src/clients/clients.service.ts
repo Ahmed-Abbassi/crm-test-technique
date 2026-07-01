@@ -6,7 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, ClientType } from '@prisma/client';
 
 @Injectable()
 export class ClientsService {
@@ -37,7 +37,7 @@ export class ClientsService {
     const where: Prisma.ClientWhereInput = {};
 
     if (type) {
-      where.type = type as any;
+      where.type = type as ClientType;
     }
 
     if (search) {

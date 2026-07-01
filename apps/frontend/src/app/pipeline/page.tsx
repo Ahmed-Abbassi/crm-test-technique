@@ -48,7 +48,7 @@ export default function PipelinePage() {
 
   return (
     <div>
-      <div className="border-b px-8 py-5 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+      <div className="border-b px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
         <div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pipeline</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Sales pipeline overview and metrics</p>
@@ -73,7 +73,7 @@ export default function PipelinePage() {
         </div>
       </div>
 
-      <div className="px-8 py-6 max-w-[1400px]">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-[1400px]">
         {view === 'board' ? (
           <PipelineBoard />
         ) : (

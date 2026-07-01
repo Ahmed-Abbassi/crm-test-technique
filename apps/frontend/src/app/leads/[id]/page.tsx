@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import type { Lead, LeadStatus } from '@/lib/types';
 import { LeadStatusBadge, formatDate } from '@/components/ui';
-import { useToast } from '@/components/ToastProvider';
 import EditLeadDrawer from '../EditLeadDrawer';
 import ConvertLeadDrawer from '../ConvertLeadDrawer';
 
@@ -145,7 +144,7 @@ function StatusPipeline({
               className="status-step"
               onDoubleClick={() => canClick && onStatusClick(status)}
               disabled={!canClick || updating}
-              title={canClick ? `X2 Click ->Set status to ${cfg.label}` : undefined}
+              title={canClick ? `Set status to ${cfg.label}` : undefined}
               style={{
                 background: bg,
                 color,
@@ -173,8 +172,7 @@ function StatusPipeline({
         {/* DISQUALIFIED — separate pill */}
         <button
           className="disq-btn"
-          title="x2 Click -> Set status to Disqualified"
-          onDoubleClick={() => !readOnly && currentIdx === 1 && onStatusClick('DISQUALIFIED')}
+          onClick={() => !readOnly && currentIdx === 1 && onStatusClick('DISQUALIFIED')}
           disabled={readOnly || currentIdx !== 1 || updating}
           style={{
             background: isDisqualified ? statusConfig.DISQUALIFIED.activeBg : 'transparent',
@@ -246,7 +244,6 @@ function Skeleton() {
 export default function LeadDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const toast = useToast();
   const [lead, setLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -283,11 +280,8 @@ export default function LeadDetailPage() {
     try {
       const response = await api.leads.update(params.id as string, { status });
       setLead(response.data);
-      toast.success(`Lead status updated to ${statusConfig[status].label}`);
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : 'Failed to update status.';
-      setStatusError(msg);
-      toast.error(msg);
+      setStatusError(err instanceof ApiError ? err.message : 'Failed to update status.');
     } finally {
       setUpdatingStatus(false);
     }
@@ -297,12 +291,9 @@ export default function LeadDetailPage() {
     setDeleting(true);
     try {
       await api.leads.delete(params.id as string);
-      toast.success('Lead deleted successfully');
       router.push('/leads');
     } catch (err) {
-      const msg = err instanceof ApiError ? err.message : 'Delete failed.';
-      setError(msg);
-      toast.error(msg);
+      setError(err instanceof ApiError ? err.message : 'Delete failed.');
       setDeleting(false);
       setShowDeleteConfirm(false);
     }
@@ -310,13 +301,11 @@ export default function LeadDetailPage() {
 
   const handleEditSaved = async () => {
     setEditDrawerOpen(false);
-    toast.success('Lead updated successfully');
     await fetchData();
   };
 
   const handleConverted = async () => {
     setConvertDrawerOpen(false);
-    toast.success('Lead converted to client successfully');
     await fetchData();
   };
 

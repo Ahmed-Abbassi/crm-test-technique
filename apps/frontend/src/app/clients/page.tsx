@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
-import type { Client, PaginationMeta } from '@/lib/types';
+import type { Client, ClientType, PaginationMeta } from '@/lib/types';
 import { SkeletonRow, EmptyState, ErrorBanner, PageHeader } from '@/components/ui';
 import { useToast } from '@/components/ToastProvider';
 import NewclientDrawer from './Newclientdrawer';
@@ -24,7 +24,7 @@ export default function ClientsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.clients.list({ type: typeFilter as any || undefined, search: search || undefined, page, limit: 20 });
+      const response = await api.clients.list({ type: typeFilter ? (typeFilter as ClientType) : undefined, search: search || undefined, page, limit: 20 });
       setClients(response.data);
       if (response.meta) setMeta(response.meta);
     } catch (err) {
@@ -36,8 +36,6 @@ export default function ClientsPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // After creating a client from the drawer, refresh the list so the new
-  // row (and updated total count) show up immediately.
   const handleClientCreated = (_client: Client) => {
     toast.success('Client created successfully');
     setPage(1);
@@ -71,19 +69,19 @@ export default function ClientsPage() {
         actions={newClientButton}
       />
 
-      <div className="px-8 py-6 space-y-6 max-w-[1400px]">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1400px]">
         {error && <ErrorBanner message={error} onRetry={fetchData} />}
 
         {/* Filter bar */}
         <div className="px-4 py-3 rounded-lg border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1">
               <input type="text" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 placeholder="Search by name or email..."
                 className="w-full border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }} />
             </div>
             <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-              className="border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
+              className="w-full sm:w-auto border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
               <option value="">All types</option>
               <option value="COMPANY">Companies</option>
               <option value="INDIVIDUAL">Individuals</option>
@@ -92,7 +90,7 @@ export default function ClientsPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-lg border overflow-hidden" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <div className="rounded-lg border overflow-hidden overflow-x-auto" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <table className="min-w-full">
             <thead>
               <tr>
@@ -131,7 +129,7 @@ export default function ClientsPage() {
                         {client.type === 'COMPANY' ? 'Company' : 'Individual'}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-sm" style={{ color: 'var(--brand-blue)' }}>{client.email}</td>
+                    <td className="px-5 py-4 text-sm whitespace-nowrap" style={{ color: 'var(--brand-blue)' }}>{client.email}</td>
                     <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{client.city ? `${client.city}${client.country ? `, ${client.country}` : ''}` : '-'}</td>
                   </tr>
                 ))
@@ -142,7 +140,7 @@ export default function ClientsPage() {
 
         {/* Pagination */}
         {meta && meta.totalPages > 1 && (
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Page {meta.page} of {meta.totalPages}</p>
             <div className="flex items-center gap-2">
               <button onClick={() => setPage((p) => p - 1)} disabled={page <= 1}

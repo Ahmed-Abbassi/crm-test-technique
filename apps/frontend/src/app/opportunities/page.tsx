@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
-import type { Opportunity, OpportunityStage, PaginationMeta } from '@/lib/types';
+import type { Opportunity, OpportunityStage, PaginationMeta, ClientType } from '@/lib/types';
 import { StageBadge, formatCurrencyFull, formatDate, SkeletonRow, EmptyState, ErrorBanner, PageHeader } from '@/components/ui';
 import NewOpportunityDrawer from './NewOpportunityDrawer';
 
@@ -22,7 +22,7 @@ export default function OpportunitiesPage() {
     try {
       const response = await api.opportunities.list({
         stage: filters.stage ? (filters.stage as OpportunityStage) : undefined,
-        clientType: filters.clientType as any || undefined,
+        clientType: filters.clientType ? (filters.clientType as ClientType) : undefined,
         page: filters.page,
         limit: 20,
       });
@@ -63,15 +63,15 @@ export default function OpportunitiesPage() {
         actions={newOpportunityButton}
       />
 
-      <div className="px-8 py-6 space-y-6 max-w-[1400px]">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1400px]">
         {error && <ErrorBanner message={error} onRetry={fetchData} />}
 
         {/* Filter bar */}
         <div className="px-4 py-3 rounded-lg border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
             <select value={filters.stage}
               onChange={(e) => setFilters((p) => ({ ...p, stage: e.target.value, page: 1 }))}
-              className="border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
+              className="w-full sm:w-auto border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
               <option value="">All stages</option>
               <option value="PROSPECTING">Prospecting</option>
               <option value="PROPOSAL">Proposal</option>
@@ -82,7 +82,7 @@ export default function OpportunitiesPage() {
 
             <select value={filters.clientType}
               onChange={(e) => setFilters((p) => ({ ...p, clientType: e.target.value, page: 1 }))}
-              className="border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
+              className="w-full sm:w-auto border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
               <option value="">All types</option>
               <option value="COMPANY">Companies</option>
               <option value="INDIVIDUAL">Individuals</option>
@@ -92,7 +92,7 @@ export default function OpportunitiesPage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-lg border overflow-hidden" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <div className="rounded-lg border overflow-hidden overflow-x-auto" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <table className="min-w-full">
             <thead>
               <tr>
@@ -131,8 +131,8 @@ export default function OpportunitiesPage() {
                     </td>
                     <td className="px-5 py-4 text-sm font-bold font-data" style={{ color: 'var(--text-primary)' }}>{formatCurrencyFull(opp.amount)}</td>
                     <td className="px-5 py-4"><StageBadge stage={opp.stage} /></td>
-                    <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{opp.expectedCloseDate ? formatDate(opp.expectedCloseDate) : '—'}</td>
-                    <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{ formatDate(opp.updatedAt)}</td>
+                    <td className="px-5 py-4 text-sm whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{opp.expectedCloseDate ? formatDate(opp.expectedCloseDate) : '—'}</td>
+                    <td className="px-5 py-4 text-sm whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{ formatDate(opp.updatedAt)}</td>
                   </tr>
                 ))
               )}
@@ -142,7 +142,7 @@ export default function OpportunitiesPage() {
 
         {/* Pagination */}
         {meta && meta.totalPages > 1 && (
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Page {meta.page} of {meta.totalPages}</p>
             <div className="flex items-center gap-2">
               <button onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))} disabled={meta.page <= 1}

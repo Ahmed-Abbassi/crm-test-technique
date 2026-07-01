@@ -82,15 +82,15 @@ export default function LeadsPage() {
         actions={newLeadButton}
       />
 
-      <div className="px-8 py-6 space-y-6 max-w-[1400px]">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1400px]">
         {error && <ErrorBanner message={error} onRetry={fetchData} />}
 
         {/* Filter bar */}
         <div className="px-4 py-3 rounded-lg border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
             <select value={filters.status}
               onChange={(e) => setFilters((p) => ({ ...p, status: e.target.value, page: 1 }))}
-              className="border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
+              className="w-full sm:w-auto border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" style={{ borderColor: 'var(--border)' }}>
               <option value="">All statuses</option>
               <option value="NEW">New</option>
               <option value="CONTACTED">Contacted</option>
@@ -101,12 +101,12 @@ export default function LeadsPage() {
             <input type="text" placeholder="Search by name or email..."
               value={filters.search}
               onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value, page: 1 }))}
-              className="border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 max-w-xs" style={{ borderColor: 'var(--border)' }} />
+              className="w-full sm:max-w-xs border rounded-lg px-3 py-1.5 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1" style={{ borderColor: 'var(--border)' }} />
           </div>
         </div>
 
         {/* Table */}
-        <div className="rounded-lg border overflow-hidden" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <div className="rounded-lg border overflow-hidden overflow-x-auto" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <table className="min-w-full">
             <thead>
               <tr>
@@ -140,10 +140,10 @@ export default function LeadsPage() {
                       className="cursor-pointer transition-colors border-b last:border-0 hover:bg-gray-50"
                       style={{ borderColor: 'var(--border-light)' }}>
                       <td className="px-5 py-4 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{name}</td>
-                      <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.email}</td>
+                      <td className="px-5 py-4 text-sm whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{lead.email}</td>
                       <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{lead.companyName || '—'}</td>
                       <td className="px-5 py-4"><LeadStatusBadge status={lead.status} /></td>
-                      <td className="px-5 py-4 text-sm" style={{ color: 'var(--text-muted)' }}>{formatDate(lead.createdAt)}</td>
+                      <td className="px-5 py-4 text-sm whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{formatDate(lead.createdAt)}</td>
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {lead.status === 'QUALIFIED' && !lead.convertedAt && (
@@ -170,7 +170,7 @@ export default function LeadsPage() {
 
         {/* Pagination */}
         {meta && meta.totalPages > 1 && (
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Page {meta.page} of {meta.totalPages}</p>
             <div className="flex items-center gap-2">
               <button onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))} disabled={meta.page <= 1}

@@ -8,7 +8,7 @@ export default function RootClientLayout({ children }: { children: React.ReactNo
     <ToastProvider>
       <div className="flex min-h-screen">
         <SidebarNav />
-        <main className="flex-1 ml-[220px] min-h-screen">
+        <main className="flex-1 lg:ml-[240px] min-h-screen pt-14 lg:pt-0">
           {children}
         </main>
       </div>

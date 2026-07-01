@@ -25,7 +25,7 @@ function PipelineFunnel({ data }: { data: PipelineSummary['byStage'] }) {
 
         return (
           <div key={stage} className="flex items-center gap-3">
-            <span className="text-xs font-medium w-28 text-right flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-xs font-medium w-20 sm:w-28 text-right flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
               {cfg.label}
             </span>
             <div className="flex-1 h-6 rounded" style={{ background: '#F3F2F1' }}>
@@ -77,22 +77,27 @@ export default function DashboardPage() {
   return (
     <div>
       {/* Top bar */}
-      <div className="border-b px-8 py-5 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+      <div className="border-b px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
         <div>
           <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{today}</p>
           <h1 className="text-2xl font-bold mt-0.5" style={{ color: 'var(--text-primary)' }}>Good morning, Sales Lead</h1>
         </div>
         <div className="flex items-center gap-3">
-          
+          <PrimaryButton href="/opportunities/new">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            New Opportunity
+          </PrimaryButton>
         </div>
       </div>
 
-      <div className="px-8 py-6 space-y-6 max-w-[1400px]">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-6 max-w-[1400px]">
         {error && <ErrorBanner message={error} onRetry={fetchData} />}
 
         {/* KPI Row */}
         {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="rounded-lg p-5 border animate-pulse" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
                 <div className="h-3 w-24 rounded mb-4" style={{ background: '#F3F2F1' }} />
@@ -101,7 +106,7 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : summary ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <MetricCard
               label="Total Pipeline"
               value={formatCurrency(summary.totalPipelineValue)}
@@ -187,7 +192,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
 
         {/* Recent opportunities */}
         <div className="rounded-lg border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
